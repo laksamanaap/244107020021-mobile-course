@@ -16,20 +16,23 @@ Repositori tugas mata kuliah **Pemrograman Mobile**.
 Setiap minggu memiliki folder tugas tersendiri dengan struktur yang sama:
 
 ```
-├── 01-week-1-mobile-development-ecosystem-flutter-refresh/
+├── week1_mobile_development_ecosystem_flutter_refresh/
 │   ├── README.md
 │   ├── lib/
 │   ├── test/
+│   ├── practice/
 │   └── screenshots/
-├── 02-week-2-declarative-ui-responsive-design/
+├── week2_declarative_ui_responsive_design/
 │   ├── README.md
 │   ├── lib/
 │   ├── test/
+│   ├── practice/
 │   └── screenshots/
-├── 03-week-3-navigation-state-management/
+├── week3_navigation_state_management/
 │   ├── README.md
 │   ├── lib/
 │   ├── test/
+│   ├── practice/
 │   └── screenshots/
 ```
 
@@ -38,9 +41,25 @@ Setiap minggu memiliki folder tugas tersendiri dengan struktur yang sama:
 | Folder / File | Keterangan |
 |---------------|------------|
 | `README.md` | Dokumentasi singkat tugas mingguan |
-| `lib/` | Source code aplikasi Flutter |
+| `lib/` | Source code aplikasi Flutter (tugas utama) |
 | `test/` | Unit test dan widget test |
+| `practice/` | Praktikum dan latihan mandiri |
 | `screenshots/` | Bukti screenshot dan jawaban refleksi |
+
+## Klarifikasi: Folder `practice/`
+
+Jika ada **praktikum** atau **latihan mandiri**, letakkan di folder `practice/` pada masing-masing folder mingguan — terpisah dari tugas utama di `lib/`.
+
+Contoh isi folder `practice/`:
+
+```
+practice/
+├── README.md
+└── widget_basics/
+    └── main.dart
+```
+
+> **Catatan:** Folder `practice/` opsional. Buat subfolder atau file di dalamnya sesuai kebutuhan latihan; tidak wajib mengikuti struktur `lib/` tugas utama.
 
 ## Klarifikasi: Folder `screenshots/`
 
@@ -52,12 +71,12 @@ Contoh isi folder `screenshots/`:
 screenshots/
 ├── home-screen.png
 ├── profile-screen.png
-└── assignment.md
+└── assignmentDocs.md
 ```
 
-### File `assignment.md`
+### File `assignmentDocs.md`
 
-File **`assignment.md`** berisi jawaban **refleksi** yang diminta pada setiap tugas.
+File **`assignmentDocs.md`** berisi jawaban **refleksi** yang diminta pada setiap tugas.
 
 Gunakan format berikut sebagai acuan:
 
@@ -71,4 +90,4 @@ Gunakan format berikut sebagai acuan:
 [Jawaban refleksi]
 ```
 
-> **Catatan:** Screenshot aplikasi (`.png`, `.jpg`, dll.) dan file refleksi (`assignment.md`) disimpan bersama di folder `screenshots/` agar bukti visual dan jawaban tertulis mudah ditemukan dalam satu lokasi.
+> **Catatan:** Screenshot aplikasi (`.png`, `.jpg`, dll.) dan file refleksi (`assignmentDocs.md`) disimpan bersama di folder `screenshots/` agar bukti visual dan jawaban tertulis mudah ditemukan dalam satu lokasi.
