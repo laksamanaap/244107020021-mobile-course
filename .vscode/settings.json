@@ -1,0 +1,15 @@
+{
+  "java.import.gradle.enabled": true,
+  "java.configuration.updateBuildConfiguration": "disabled",
+  "java.import.exclusions": [
+    "**/week1_mobile_development_ecosystem_flutter_refresh/**",
+    "**/week2_mobile_development_ecosystem_flutter_refresh/**",
+    "**/build/**",
+    "**/.dart_tool/**"
+  ],
+  "files.watcherExclude": {
+    "**/build/**": true,
+    "**/.dart_tool/**": true,
+    "**/android/.gradle/**": true
+  }
+}

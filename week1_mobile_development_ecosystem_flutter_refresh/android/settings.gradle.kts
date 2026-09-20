@@ -23,4 +23,5 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.4.0" apply false
 }
 
+rootProject.name = "week1_mobile_development_ecosystem_flutter_refresh"
 include(":app")
