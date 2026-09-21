@@ -44,13 +44,6 @@ class _MusicPlayboxPageState extends State<MusicPlayboxPage> {
   final ScrollController _controller = ScrollController();
 
   void openBottomSheet(BuildContext context) {
-    final lyricStyle = TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-      color: Colors.grey.shade600,
-      fontFamily: GoogleFonts.poppins().fontFamily,
-    );
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
