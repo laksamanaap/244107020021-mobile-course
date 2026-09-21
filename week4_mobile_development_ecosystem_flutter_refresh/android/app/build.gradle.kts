@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.week3_mobile_development_ecosystem_flutter_refresh"
+    namespace = "com.example.week4_mobile_development_ecosystem_flutter_refresh"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.week3_mobile_development_ecosystem_flutter_refresh"
+        applicationId = "com.example.week4_mobile_development_ecosystem_flutter_refresh"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

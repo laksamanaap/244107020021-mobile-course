@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:week3_mobile_development_ecosystem_flutter_refresh/main.dart';
+import 'package:week4_mobile_development_ecosystem_flutter_refresh/main.dart';
 
 void main() {
-  testWidgets('Music Playbox smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyAppWeek3());
-    await tester.pumpAndSettle();
+  testWidgets('App smoke test', (WidgetTester tester) async {
+    await tester.pumpWidget(const MyAppWeek4());
+    await tester.pump();
 
-    expect(find.text('Music Playbox'), findsWidgets);
+    expect(find.text('Home'), findsWidgets);
   });
 }
