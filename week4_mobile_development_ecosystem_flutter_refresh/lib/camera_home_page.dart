@@ -28,9 +28,8 @@ class _CameraHomePageState extends State<CameraHomePage>
   int _cameraIndex = 0;
   bool _isSaving = false;
 
-  bool get _hasFrontCamera => widget.cameras.any(
-        (c) => c.lensDirection == CameraLensDirection.front,
-      );
+  bool get _hasFrontCamera =>
+      widget.cameras.any((c) => c.lensDirection == CameraLensDirection.front);
 
   bool get _isSelfie {
     if (widget.cameras.isEmpty) return false;
@@ -74,17 +73,20 @@ class _CameraHomePageState extends State<CameraHomePage>
     );
 
     _controller = controller;
-    _initializeControllerFuture = controller.initialize().then((_) {
-      if (!mounted) return;
-      setState(() {
-        _error = null;
-      });
-    }).catchError((e) {
-      if (!mounted) return;
-      setState(() {
-        _error = 'Gagal membuka kamera: $e';
-      });
-    });
+    _initializeControllerFuture = controller
+        .initialize()
+        .then((_) {
+          if (!mounted) return;
+          setState(() {
+            _error = null;
+          });
+        })
+        .catchError((e) {
+          if (!mounted) return;
+          setState(() {
+            _error = 'Gagal membuka kamera: $e';
+          });
+        });
 
     if (mounted) setState(() {});
   }
@@ -136,7 +138,7 @@ class _CameraHomePageState extends State<CameraHomePage>
     if (state == AppLifecycleState.inactive) {
       controller.dispose();
       _controller = null;
-      } else if (state == AppLifecycleState.resumed) {
+    } else if (state == AppLifecycleState.resumed) {
       _initCamera();
     }
   }
@@ -158,9 +160,8 @@ class _CameraHomePageState extends State<CameraHomePage>
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal mengambil foto: $e')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Gagal mengambil foto: $e')));
     }
   }
 
@@ -199,7 +200,9 @@ class _CameraHomePageState extends State<CameraHomePage>
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Foto berhasil disimpan ke Galeri (album Music Playbox)'),
+          content: Text(
+            'Foto berhasil disimpan ke Galeri (album Music Playbox)',
+          ),
         ),
       );
     } on GalException catch (e) {
@@ -209,9 +212,8 @@ class _CameraHomePageState extends State<CameraHomePage>
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menyimpan foto: $e')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Gagal menyimpan foto: $e')));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -253,10 +255,7 @@ class _CameraHomePageState extends State<CameraHomePage>
                       Widget preview = CameraPreview(controller);
                       // Mirror preview saat selfie biar natural
                       if (_isSelfie) {
-                        preview = Transform.scale(
-                          scaleX: -1,
-                          child: preview,
-                        );
+                        preview = Transform.scale(scaleX: -1, child: preview);
                       }
                       return preview;
                     }
@@ -312,7 +311,8 @@ class _CameraHomePageState extends State<CameraHomePage>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               FloatingActionButton(
-                heroTag: 'open_location',
+                // Hero antar halaman: Home → Peta
+                heroTag: 'location_hero',
                 onPressed: () async {
                   final navigator = Navigator.of(context);
 
@@ -325,15 +325,13 @@ class _CameraHomePageState extends State<CameraHomePage>
                   setState(() {});
 
                   await navigator.push(
-                    MaterialPageRoute(
-                      builder: (_) => const LocationMapPage(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const LocationMapPage()),
                   );
 
                   if (!mounted) return;
                   await _initCamera();
                 },
-                backgroundColor: const Color.fromARGB(255, 25, 118, 210),
+                backgroundColor: const Color.fromARGB(255, 161, 29, 29),
                 child: const Icon(Icons.location_on, color: Colors.white),
               ),
               const SizedBox(width: 16),
@@ -346,7 +344,9 @@ class _CameraHomePageState extends State<CameraHomePage>
               const SizedBox(width: 16),
               FloatingActionButton.extended(
                 heroTag: 'save_picture',
-                onPressed: _imagePath == null || _isSaving ? null : _savePicture,
+                onPressed: _imagePath == null || _isSaving
+                    ? null
+                    : _savePicture,
                 backgroundColor: _imagePath == null
                     ? Colors.grey
                     : const Color.fromARGB(255, 46, 125, 50),

@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Week2 Mobile Development Ecosystem Flutter Refresh</string>
+	<string>Study Case Music App</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>week4_mobile_development_ecosystem_flutter_refresh</string>
+	<string>Study Case Music App</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Aplikasi membutuhkan kamera untuk mengambil foto di halaman Home.</string>
 	<key>NSMicrophoneUsageDescription</key>

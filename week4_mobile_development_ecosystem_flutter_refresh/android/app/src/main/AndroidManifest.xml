@@ -11,7 +11,7 @@
         tools:replace="android:maxSdkVersion" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <application
-        android:label="week4_mobile_development_ecosystem_flutter_refresh"
+        android:label="Study Case Music App"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
