@@ -1,6 +1,9 @@
 import 'repositories/note_repository.dart';
 import 'local/note.dart';
 
+/// Hanya berisi logika sinkronisasi: [syncNotes], [resolveConflict], [OfflineException].
+/// Tidak mengakses UI dan tidak mengurus cache posts.
+
 class OfflineException implements Exception {
   OfflineException([this.message = 'Perangkat sedang offline']);
 

@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../remote/post.dart';
 
-/// Repository khusus cache posts (bukan catatan).
+/// Pintu cache/remote posts saja. Tidak mengurus tabel `notes`.
 class PostRepository {
   PostRepository({required this.openDb, Dio? dio}) : _dio = dio ?? Dio();
 

@@ -2,8 +2,8 @@ import 'package:sqflite/sqflite.dart';
 
 import '../local/note.dart';
 
-/// Repository CRUD catatan. Constructor menerima [openDb] agar mudah diuji
-/// (dependency injection).
+/// Pintu CRUD catatan saja. Cache posts ada di [PostRepository];
+/// aturan sync ada di `lib/data/sync.dart`.
 class NoteRepository {
   NoteRepository({required this.openDb});
 
