@@ -1,4 +1,4 @@
-﻿# Week 5 — Offline Notes (Local Storage & Offline First)
+﻿# Week 5 - Offline Notes (Local Storage & Offline First)
 
 ## Identitas
 
@@ -292,25 +292,6 @@ Alasan memilih LWW: cocok untuk modul single-user / simulasi sync tanpa UI konfl
 
 ---
 
-## Checklist Verifikasi Mandiri
-
-- [x] `flutter analyze` â†’ No issues found!
-- [x] `flutter test` â†’ 10 test lulus
-- [x] Tidak ada import `sqflite` / `shared_preferences` di `lib/pages/` & `lib/widgets/`
-- [x] Tidak ada definisi provider di `lib/pages/`
-- [ ] Badge dirty sebelum/sesudah sync, posts tanpa internet, mode pesawat — **perlu uji manual**
-
----
-
-## Catatan Adaptasi
-
-- File `_ref/modul-referensi.md` tidak tersedia di repo; implementasi mengikuti `MASTER_PROMPT_CURSOR_week5_offline_notes.md`.
-- Riverpod 3.4.3 **tidak** menyediakan `StateProvider` â†’ diganti `NotifierProvider` (`ForceOfflineNotifier`).
-- `go_router` 18.x dipakai untuk rute `/`, `/note/:id`, `/posts`, `/settings`.
-- Build Android: `kotlin.incremental=false` + heap Gradle diturunkan (`-Xmx1536m`) di `android/gradle.properties` — sebelumnya daemon crash OOM karena `-Xmx8G` sementara disk C: hampir penuh.
-- Flutter Web: sqflite diganti `MemoryNoteRepository` / `MemoryPostRepository` (hanya `kIsWeb`) agar bisa demo & ambil screenshot.
-
----
 
 ## Kesimpulan
 
@@ -319,5 +300,4 @@ Hal terpenting yang saya pelajari adalah memisahkan UI dari storage lewat reposi
 ## Dokumentasi tambahan
 
 - [docs/uji-offline.md](docs/uji-offline.md)
-- Tag git: `praktikum-0` â€¦ `praktikum-7`, `praktikum-9`
 
