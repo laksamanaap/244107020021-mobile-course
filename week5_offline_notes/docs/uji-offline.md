@@ -52,17 +52,31 @@ No issues found! (ran in 3.3s)
 
 (Flutter 3.47.2, Dart 3.13.2 — dijalankan 5 Oktober 2026)
 
-## (g) Referensi screenshot
+## (g) Yang perlu di-screenshot (tempel langsung di README)
 
-- [../screenshots/p3-empty-state.png](../screenshots/p3-empty-state.png)
-- [../screenshots/p3-form-validasi.png](../screenshots/p3-form-validasi.png)
-- [../screenshots/p3-daftar-catatan.png](../screenshots/p3-daftar-catatan.png)
-- [../screenshots/p3-error-state.png](../screenshots/p3-error-state.png)
-- [../screenshots/p3-mode-pesawat.png](../screenshots/p3-mode-pesawat.png)
-- [../screenshots/p4-dirty-sebelum.png](../screenshots/p4-dirty-sebelum.png)
-- [../screenshots/p4-sync-ditolak.png](../screenshots/p4-sync-ditolak.png)
-- [../screenshots/p4-sync-berhasil.png](../screenshots/p4-sync-berhasil.png)
-- [../screenshots/p4-dirty-sesudah.png](../screenshots/p4-dirty-sesudah.png)
-- [../screenshots/p4-posts-online.png](../screenshots/p4-posts-online.png)
-- [../screenshots/p4-posts-offline.png](../screenshots/p4-posts-offline.png)
-- [../screenshots/p5-flutter-test.png](../screenshots/p5-flutter-test.png)
+Tidak perlu nama file khusus. Ambil layar → tempel di slot README yang sesuai.
+
+| Urutan | Di mana di app | Apa yang terlihat | Slot di README |
+|---|---|---|---|
+| 1 | **Pengaturan** (⚙) | Mode gelap OFF | Praktikum 1 — tema terang |
+| 2 | **Pengaturan** | Mode gelap ON | Praktikum 1 — tema gelap |
+| 3 | **Pengaturan** | Baris "Terakhir dibuka" | Praktikum 1 — terakhir dibuka |
+| 4 | Terminal | `flutter analyze` OK | Praktikum 2 |
+| 5 | **Catatan Offline** | Empty: "Belum ada catatan…" | Praktikum 3 |
+| 6 | Dialog **+** | Error "Judul wajib diisi" | Praktikum 3 |
+| 7 | **Catatan Offline** | Ada daftar + chip dirty | Praktikum 3 |
+| 8 | **Catatan Offline** | Error + "Coba lagi" | Praktikum 3 |
+| 9 | **Catatan Offline** + airplane | Daftar tetap jalan | Praktikum 3 |
+| 10 | **Catatan Offline** | Badge awan oranye | Praktikum 4 — dirty sebelum |
+| 11 | Home → Sinkronkan (offline ON) | Snackbar ditolak | Praktikum 4 |
+| 12 | Home → Sinkronkan (offline OFF) | Snackbar berhasil | Praktikum 4 |
+| 13 | **Catatan Offline** | Ikon hijau setelah sync | Praktikum 4 |
+| 14 | **Posts** online | Daftar posts | Praktikum 4 |
+| 15 | **Posts** + force offline | Masih dari cache | Praktikum 4 |
+| 16 | Terminal | `flutter test` lulus | Praktikum 5 |
+| 17 | **Catatan Offline** | Chip "belum tersinkron" | Refactoring |
+| 18 | **Detail catatan** (tap item) | Halaman detail | Refactoring |
+
+### Alur klik
+
+Home → **+** / daftar / **Sinkronkan** → tap item (detail) → **Posts** → ⚙ **Pengaturan**

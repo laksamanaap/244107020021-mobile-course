@@ -19,5 +19,5 @@ void main() {
   profil.nama = 'Laksamana';
   profil.nim = '1234567890';
   profil.email = 'laksamana@sarana.ai';
-  print(profil.email);
+    (profil.email);
 }

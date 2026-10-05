@@ -15,30 +15,6 @@
 
 Setelah praktikum ini saya mampu menyimpan preferensi lokal dengan SharedPreferences, mengelola data catatan di SQLite lewat repository, menampilkan empat state UI dengan Riverpod, serta menerapkan pola offline-first (dirty flag, cache-first posts, sinkronisasi, dan aturan konflik last-write-wins).
 
-## Fitur Utama
-
-- Tema gelap/terang persisten + waktu terakhir dibuka
-- CRUD catatan SQLite diurut `updated_at` terbaru
-- Empat state UI: loading, error (+ Coba lagi), empty, success
-- Dirty flag + badge awan oranye/hijau
-- Sync dengan saklar **Paksa mode offline**
-- Cache-first posts (JSONPlaceholder + tabel `cached_posts`)
-- Konflik last-write-wins (`resolveConflict`)
-- Halaman detail dengan GoRouter (`/note/:id`)
-- `NoteTile` dengan chip "belum tersinkron"
-
-## Stack Teknologi
-
-| Paket | Versi (`pubspec.lock`) |
-|---|---|
-| Flutter / Dart | 3.47.2 / 3.13.2 |
-| flutter_riverpod | 3.4.3 |
-| shared_preferences | 2.5.5 |
-| sqflite | 2.4.4 |
-| path | 1.9.1 |
-| dio | 5.11.1 |
-| go_router | 18.0.2 |
-
 ## Arsitektur
 
 ```
@@ -65,22 +41,6 @@ lib/
   widgets/      note_form_dialog, note_tile
 ```
 
-## Cara Menjalankan
-
-```bash
-cd week5_offline_notes
-flutter pub get
-flutter run          # emulator Android / perangkat fisik — JANGAN Chrome
-flutter analyze
-flutter test
-```
-
-Jika muncul `MissingPluginException` setelah menambah plugin: stop aplikasi lalu `flutter run` ulang (bukan hanya hot reload).
-
-Ringkasan lingkungan (Tahap 0):
-
-![flutter doctor](screenshots/p0-flutter-doctor.png)
-
 ---
 
 ## Hasil Praktikum 1 — SharedPreferences
@@ -89,9 +49,17 @@ Saya membuat `PrefsRepository` sebagai satu-satunya pintu ke SharedPreferences, 
 
 **File:** `lib/data/prefs.dart`, `lib/providers/prefs_providers.dart`, `lib/pages/settings_page.dart`
 
-![tema terang](screenshots/p1-tema-terang.png)
-![tema gelap](screenshots/p1-tema-gelap.png)
-![terakhir dibuka](screenshots/p1-terakhir-dibuka.png)
+**Screenshot — Pengaturan, tema terang**
+
+<!-- tempel screenshot di sini -->
+
+**Screenshot — Pengaturan, tema gelap**
+
+<!-- tempel screenshot di sini -->
+
+**Screenshot — Pengaturan, terakhir dibuka**
+
+<!-- tempel screenshot di sini -->
 
 ### Pertanyaan & Jawaban
 
@@ -112,7 +80,9 @@ Saya membuat model `Note` (`toMap`/`fromMap`), skema `notes` + `cached_posts` di
 
 **File:** `lib/data/local/note.dart`, `lib/data/local/db.dart`, `lib/data/repositories/note_repository.dart`
 
-![flutter analyze](screenshots/p2-flutter-analyze.png)
+**Screenshot — hasil `flutter analyze`**
+
+<!-- tempel screenshot di sini -->
 
 ### Pertanyaan & Jawaban
 
@@ -132,11 +102,25 @@ Saya membuat `notesProvider`, `dirtyCountProvider`, dan `NoteActions` yang selal
 
 **File:** `lib/providers/note_providers.dart`, `lib/pages/notes_page.dart`, `lib/widgets/note_form_dialog.dart`
 
-![empty](screenshots/p3-empty-state.png)
-![validasi](screenshots/p3-form-validasi.png)
-![daftar](screenshots/p3-daftar-catatan.png)
-![error](screenshots/p3-error-state.png)
-![pesawat](screenshots/p3-mode-pesawat.png)
+**Screenshot — empty state (home Catatan Offline)**
+
+<!-- tempel screenshot di sini -->
+
+**Screenshot — validasi form (judul kosong)**
+
+<!-- tempel screenshot di sini -->
+
+**Screenshot — daftar catatan**
+
+<!-- tempel screenshot di sini -->
+
+**Screenshot — error state + tombol Coba lagi**
+
+<!-- tempel screenshot di sini -->
+
+**Screenshot — mode pesawat, daftar tetap jalan**
+
+<!-- tempel screenshot di sini -->
 
 ### Pertanyaan & Jawaban
 
@@ -166,12 +150,29 @@ Saya menambahkan `forceOfflineProvider`, `syncNotes` + `resolveConflict`, `PostR
 
 **File:** `lib/data/sync.dart`, `lib/providers/post_providers.dart`, `lib/pages/posts_page.dart`, …
 
-![dirty sebelum](screenshots/p4-dirty-sebelum.png)
-![sync ditolak](screenshots/p4-sync-ditolak.png)
-![sync berhasil](screenshots/p4-sync-berhasil.png)
-![dirty sesudah](screenshots/p4-dirty-sesudah.png)
-![posts online](screenshots/p4-posts-online.png)
-![posts offline](screenshots/p4-posts-offline.png)
+**Screenshot — badge dirty sebelum sync**
+
+<!-- tempel screenshot di sini -->
+
+**Screenshot — sync ditolak (force offline ON)**
+
+<!-- tempel screenshot di sini -->
+
+**Screenshot — sync berhasil**
+
+<!-- tempel screenshot di sini -->
+
+**Screenshot — setelah sync (ikon hijau / badge hilang)**
+
+<!-- tempel screenshot di sini -->
+
+**Screenshot — Posts online**
+
+<!-- tempel screenshot di sini -->
+
+**Screenshot — Posts offline (dari cache)**
+
+<!-- tempel screenshot di sini -->
 
 ### Pertanyaan & Jawaban
 
@@ -200,7 +201,9 @@ Saya menambahkan `forceOfflineProvider`, `syncNotes` + `resolveConflict`, `PostR
 
 Tujuh test model/sync di `test/note_test.dart` memakai `FakeNoteRepository`; ditambah `post_provider_test.dart` (cache offline + OfflineException) dan `notes_page_test.dart` (empty state widget).
 
-![flutter test](screenshots/p5-flutter-test.png)
+**Screenshot — hasil `flutter test`**
+
+<!-- tempel screenshot di sini -->
 
 ### Keluaran asli
 
@@ -258,11 +261,18 @@ Alasan memilih LWW: cocok untuk modul single-user / simulasi sync tanpa UI konfl
 
 ## Refactoring
 
-1. `NoteTile` + chip "belum tersinkron" — commit `refactor(widgets): ekstrak NoteTile dengan chip belum tersinkron`  
-   ![notetile](screenshots/refactor-notetile-chip.png)
+1. `NoteTile` + chip "belum tersinkron" — commit `refactor(widgets): ekstrak NoteTile dengan chip belum tersinkron`
+
+**Screenshot — NoteTile chip belum tersinkron**
+
+<!-- tempel screenshot di sini -->
+
 2. Pisah tanggung jawab repo/sync — commit `refactor(data): pisahkan tanggung jawab repository dan sync`
-3. Detail + GoRouter — commit `feat(router): halaman detail catatan dengan GoRouter`  
-   ![detail](screenshots/refactor-detail-page.png)
+3. Detail + GoRouter — commit `feat(router): halaman detail catatan dengan GoRouter`
+
+**Screenshot — halaman detail catatan**
+
+<!-- tempel screenshot di sini -->
 
 ---
 
@@ -297,6 +307,7 @@ Alasan memilih LWW: cocok untuk modul single-user / simulasi sync tanpa UI konfl
 - File `_ref/modul-referensi.md` tidak tersedia di repo; implementasi mengikuti `MASTER_PROMPT_CURSOR_week5_offline_notes.md`.
 - Riverpod 3.4.3 **tidak** menyediakan `StateProvider` → diganti `NotifierProvider` (`ForceOfflineNotifier`).
 - `go_router` 18.x dipakai untuk rute `/`, `/note/:id`, `/posts`, `/settings`.
+- Build Android: `kotlin.incremental=false` di `android/gradle.properties` untuk menghindari error Kotlin cache beda drive (C: pub-cache vs D: project).
 
 ---
 
