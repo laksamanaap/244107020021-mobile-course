@@ -2,14 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/local/note.dart';
+import '../data/sync.dart';
 import '../providers/note_providers.dart';
 import '../widgets/note_form_dialog.dart';
+import 'posts_page.dart';
 import 'settings_page.dart';
 
 class NotesPage extends ConsumerWidget {
   const NotesPage({super.key});
 
-  Future<void> _openForm(BuildContext context, WidgetRef ref, {Note? note}) async {
+  Future<void> _openForm(
+    BuildContext context,
+    WidgetRef ref, {
+    Note? note,
+  }) async {
     final result = await showDialog<({String title, String content})>(
       context: context,
       builder: (_) => NoteFormDialog(initial: note),
@@ -23,6 +29,21 @@ class NotesPage extends ConsumerWidget {
       await actions.update(
         note.copyWith(title: result.title, content: result.content),
       );
+    }
+  }
+
+  Future<void> _sync(BuildContext context, WidgetRef ref) async {
+    // Ambil messenger SEBELUM await agar tidak memakai BuildContext setelah async gap.
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(noteActionsProvider).sync();
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Sinkronisasi berhasil')),
+      );
+    } on OfflineException catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('$e')));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('Gagal sync: $e')));
     }
   }
 
@@ -54,6 +75,18 @@ class NotesPage extends ConsumerWidget {
               padding: const EdgeInsets.only(right: 8),
               child: Icon(Icons.cloud_done, color: Colors.green.shade600),
             ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const PostsPage()),
+              );
+            },
+            child: const Text('Posts'),
+          ),
+          TextButton(
+            onPressed: () => _sync(context, ref),
+            child: const Text('Sinkronkan'),
+          ),
           IconButton(
             tooltip: 'Pengaturan',
             icon: const Icon(Icons.settings),

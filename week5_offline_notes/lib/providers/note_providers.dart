@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/local/db.dart';
 import '../data/local/note.dart';
 import '../data/repositories/note_repository.dart';
+import '../data/sync.dart';
+import 'offline_providers.dart';
 
 final noteRepositoryProvider = Provider<NoteRepository>((ref) {
   return NoteRepository(openDb: openAppDatabase);
@@ -48,6 +50,12 @@ class NoteActions {
 
   Future<void> delete(int id) async {
     await _repo.deleteNote(id);
+    _refresh();
+  }
+
+  Future<void> sync({Duration latency = const Duration(seconds: 1)}) async {
+    final offline = _ref.read(forceOfflineProvider);
+    await syncNotes(repo: _repo, offline: offline, latency: latency);
     _refresh();
   }
 }
