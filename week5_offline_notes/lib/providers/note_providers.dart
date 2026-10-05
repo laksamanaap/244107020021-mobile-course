@@ -18,6 +18,11 @@ final dirtyCountProvider = FutureProvider<int>((ref) {
   return ref.watch(noteRepositoryProvider).countDirty();
 });
 
+/// Membaca satu catatan dari repository lokal (bukan dari state list).
+final noteByIdProvider = FutureProvider.family<Note?, int>((ref, id) {
+  return ref.watch(noteRepositoryProvider).getById(id);
+});
+
 /// Semua mutasi catatan lewat kelas ini agar notes + dirtyCount ikut di-refresh.
 class NoteActions {
   NoteActions(this._ref);
@@ -26,9 +31,14 @@ class NoteActions {
 
   NoteRepository get _repo => _ref.read(noteRepositoryProvider);
 
-  void _refresh() {
+  void _refresh([int? noteId]) {
     _ref.invalidate(notesProvider);
     _ref.invalidate(dirtyCountProvider);
+    if (noteId != null) {
+      _ref.invalidate(noteByIdProvider(noteId));
+    } else {
+      _ref.invalidate(noteByIdProvider);
+    }
   }
 
   Future<void> add({required String title, required String content}) async {
@@ -45,12 +55,12 @@ class NoteActions {
 
   Future<void> update(Note note) async {
     await _repo.updateNote(note);
-    _refresh();
+    _refresh(note.id);
   }
 
   Future<void> delete(int id) async {
     await _repo.deleteNote(id);
-    _refresh();
+    _refresh(id);
   }
 
   Future<void> sync({Duration latency = const Duration(seconds: 1)}) async {

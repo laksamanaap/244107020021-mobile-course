@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/local/note.dart';
 import '../data/sync.dart';
 import '../providers/note_providers.dart';
 import '../widgets/note_form_dialog.dart';
 import '../widgets/note_tile.dart';
-import 'posts_page.dart';
-import 'settings_page.dart';
 
 class NotesPage extends ConsumerWidget {
   const NotesPage({super.key});
@@ -34,7 +33,6 @@ class NotesPage extends ConsumerWidget {
   }
 
   Future<void> _sync(BuildContext context, WidgetRef ref) async {
-    // Ambil messenger SEBELUM await agar tidak memakai BuildContext setelah async gap.
     final messenger = ScaffoldMessenger.of(context);
     try {
       await ref.read(noteActionsProvider).sync();
@@ -77,11 +75,7 @@ class NotesPage extends ConsumerWidget {
               child: Icon(Icons.cloud_done, color: Colors.green.shade600),
             ),
           TextButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const PostsPage()),
-              );
-            },
+            onPressed: () => context.push('/posts'),
             child: const Text('Posts'),
           ),
           TextButton(
@@ -91,11 +85,7 @@ class NotesPage extends ConsumerWidget {
           IconButton(
             tooltip: 'Pengaturan',
             icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const SettingsPage()),
-              );
-            },
+            onPressed: () => context.push('/settings'),
           ),
         ],
       ),
@@ -137,7 +127,7 @@ class NotesPage extends ConsumerWidget {
               final note = notes[index];
               return NoteTile(
                 note: note,
-                onTap: () => _openForm(context, ref, note: note),
+                onTap: () => context.push('/note/${note.id}'),
                 onDelete: () => ref.read(noteActionsProvider).delete(note.id!),
               );
             },

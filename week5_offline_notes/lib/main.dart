@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'app_router.dart';
 import 'data/prefs.dart';
-import 'pages/notes_page.dart';
 import 'providers/prefs_providers.dart';
 
 Future<void> main() async {
@@ -27,7 +27,7 @@ class OfflineNotesApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final darkMode = ref.watch(darkModeProvider);
 
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Week 5 Offline Notes',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
@@ -41,7 +41,7 @@ class OfflineNotesApp extends ConsumerWidget {
         useMaterial3: true,
       ),
       themeMode: (darkMode.value ?? false) ? ThemeMode.dark : ThemeMode.light,
-      home: const NotesPage(),
+      routerConfig: appRouter,
     );
   }
 }

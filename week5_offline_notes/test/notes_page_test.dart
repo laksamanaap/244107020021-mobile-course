@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:week5_offline_notes/data/local/note.dart';
 import 'package:week5_offline_notes/pages/notes_page.dart';
@@ -10,13 +11,19 @@ void main() {
   testWidgets('NotesPage menampilkan empty state tanpa menyentuh SQLite', (
     tester,
   ) async {
+    final router = GoRouter(
+      routes: [
+        GoRoute(path: '/', builder: (_, _) => const NotesPage()),
+      ],
+    );
+
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           notesProvider.overrideWith((ref) async => <Note>[]),
           dirtyCountProvider.overrideWith((ref) async => 0),
         ],
-        child: const MaterialApp(home: NotesPage()),
+        child: MaterialApp.router(routerConfig: router),
       ),
     );
 
