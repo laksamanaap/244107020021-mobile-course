@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -35,12 +36,19 @@ class NotesPage extends ConsumerWidget {
   Future<void> _sync(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
     try {
-      await ref.read(noteActionsProvider).sync();
+      await ref.read(noteActionsProvider).sync(
+            latency: kIsWeb ? const Duration(milliseconds: 300) : const Duration(seconds: 1),
+          );
       messenger.showSnackBar(
-        const SnackBar(content: Text('Sinkronisasi berhasil')),
+        const SnackBar(
+          content: Text('Sinkronisasi berhasil'),
+          duration: Duration(seconds: 6),
+        ),
       );
     } on OfflineException catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('$e')));
+      messenger.showSnackBar(
+        SnackBar(content: Text('$e'), duration: const Duration(seconds: 6)),
+      );
     } catch (e) {
       messenger.showSnackBar(SnackBar(content: Text('Gagal sync: $e')));
     }
@@ -74,13 +82,15 @@ class NotesPage extends ConsumerWidget {
               padding: const EdgeInsets.only(right: 8),
               child: Icon(Icons.cloud_done, color: Colors.green.shade600),
             ),
-          TextButton(
+          IconButton(
+            tooltip: 'Posts',
+            icon: const Icon(Icons.article_outlined),
             onPressed: () => context.push('/posts'),
-            child: const Text('Posts'),
           ),
-          TextButton(
+          IconButton(
+            tooltip: 'Sinkronkan',
+            icon: const Icon(Icons.sync),
             onPressed: () => _sync(context, ref),
-            child: const Text('Sinkronkan'),
           ),
           IconButton(
             tooltip: 'Pengaturan',

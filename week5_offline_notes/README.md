@@ -1,4 +1,4 @@
-# Week 5 — Offline Notes (Local Storage & Offline First)
+﻿# Week 5 — Offline Notes (Local Storage & Offline First)
 
 ## Identitas
 
@@ -19,14 +19,14 @@ Setelah praktikum ini saya mampu menyimpan preferensi lokal dengan SharedPrefere
 
 ```
 UI (pages/widgets)
-    ↓ watch / read
+    â†“ watch / read
 Provider (lib/providers/)
-    ↓
+    â†“
 Repository (NoteRepository / PostRepository / PrefsRepository)
-    ↓
+    â†“
 SQLite / SharedPreferences
 
-Sync: NoteActions.sync() → syncNotes() → remote simulasi → markAllSynced (dirty=0)
+Sync: NoteActions.sync() â†’ syncNotes() â†’ remote simulasi â†’ markAllSynced (dirty=0)
 ```
 
 ```
@@ -51,15 +51,15 @@ Saya membuat `PrefsRepository` sebagai satu-satunya pintu ke SharedPreferences, 
 
 **Screenshot — Pengaturan, tema terang**
 
-<!-- tempel screenshot di sini -->
+![tema terang](screenshots/p1-tema-terang.png)
 
 **Screenshot — Pengaturan, tema gelap**
 
-<!-- tempel screenshot di sini -->
+![tema gelap](screenshots/p1-tema-gelap.png)
 
 **Screenshot — Pengaturan, terakhir dibuka**
 
-<!-- tempel screenshot di sini -->
+![terakhir dibuka](screenshots/p1-terakhir-dibuka.png)
 
 ### Pertanyaan & Jawaban
 
@@ -67,7 +67,7 @@ Saya membuat `PrefsRepository` sebagai satu-satunya pintu ke SharedPreferences, 
 Karena `build()` bisa dipanggil berkali-kali setiap rebuild dan harus tetap sinkron. Memanggil API async di situ membuat pembacaan berulang, UI bisa berkedip, dan sulit diuji. Saya bungkus lewat `PrefsRepository` + `prefsRepositoryProvider` yang di-override sekali di `main.dart`, sehingga hasil ter-cache dan bisa diganti di test.
 
 **1.2** Jelaskan alur toggle mode gelap.  
-Switch ditekan → `DarkModeNotifier.toggle()` → state langsung `AsyncData(next)` → `OfflineNotesApp` yang me-`watch(darkModeProvider)` rebuild sehingga `themeMode` berubah → `PrefsRepository.setDarkMode` menulis bool lewat platform channel ke disk (XML `shared_prefs` di Android). Saat dibuka ulang, `build()` notifier membaca nilai dari disk.
+Switch ditekan â†’ `DarkModeNotifier.toggle()` â†’ state langsung `AsyncData(next)` â†’ `OfflineNotesApp` yang me-`watch(darkModeProvider)` rebuild sehingga `themeMode` berubah â†’ `PrefsRepository.setDarkMode` menulis bool lewat platform channel ke disk (XML `shared_prefs` di Android). Saat dibuka ulang, `build()` notifier membaca nilai dari disk.
 
 **1.3** Kelebihan dan risiko optimistic update.  
 Kelebihan: UI responsif tanpa kedipan loading. Risiko: UI sempat menampilkan nilai yang gagal disimpan — karena itu saya rollback ke nilai sebelumnya di blok `catch` pada `toggle()`.
@@ -82,7 +82,7 @@ Saya membuat model `Note` (`toMap`/`fromMap`), skema `notes` + `cached_posts` di
 
 **Screenshot — hasil `flutter analyze`**
 
-<!-- tempel screenshot di sini -->
+![flutter analyze](screenshots/p2-flutter-analyze.png)
 
 ### Pertanyaan & Jawaban
 
@@ -92,7 +92,7 @@ Saya membuat model `Note` (`toMap`/`fromMap`), skema `notes` + `cached_posts` di
 
 **2.3** `where: 'id = ?'` + `whereArgs` mencegah SQL injection dan kesalahan escaping; nilai dikirim terpisah sebagai parameter.
 
-**2.4** Tanpa menaikkan `version`, `onCreate` tidak jalan lagi karena berkas DB sudah ada → kolom baru tidak terbentuk → error `no such column`. Solusi: naikkan `version` + `onUpgrade` (ALTER TABLE), atau uninstall app saat development.
+**2.4** Tanpa menaikkan `version`, `onCreate` tidak jalan lagi karena berkas DB sudah ada â†’ kolom baru tidak terbentuk â†’ error `no such column`. Solusi: naikkan `version` + `onUpgrade` (ALTER TABLE), atau uninstall app saat development.
 
 ---
 
@@ -104,27 +104,27 @@ Saya membuat `notesProvider`, `dirtyCountProvider`, dan `NoteActions` yang selal
 
 **Screenshot — empty state (home Catatan Offline)**
 
-<!-- tempel screenshot di sini -->
+![empty state](screenshots/p3-empty-state.png)
 
 **Screenshot — validasi form (judul kosong)**
 
-<!-- tempel screenshot di sini -->
+![validasi form](screenshots/p3-form-validasi.png)
 
 **Screenshot — daftar catatan**
 
-<!-- tempel screenshot di sini -->
+![daftar catatan](screenshots/p3-daftar-catatan.png)
 
 **Screenshot — error state + tombol Coba lagi**
 
-<!-- tempel screenshot di sini -->
+![error state](screenshots/p3-error-state.png)
 
 **Screenshot — mode pesawat, daftar tetap jalan**
 
-<!-- tempel screenshot di sini -->
+![mode pesawat](screenshots/p3-mode-pesawat.png)
 
 ### Pertanyaan & Jawaban
 
-**3.1** Kedua provider membaca tabel yang sama dari sudut berbeda. Hanya invalidate `notesProvider` → daftar berubah tapi badge dirty basi; hanya `dirtyCountProvider` → badge benar tapi daftar tidak berubah. Makanya `_refresh()` meng-invalidate keduanya.
+**3.1** Kedua provider membaca tabel yang sama dari sudut berbeda. Hanya invalidate `notesProvider` â†’ daftar berubah tapi badge dirty basi; hanya `dirtyCountProvider` â†’ badge benar tapi daftar tidak berubah. Makanya `_refresh()` meng-invalidate keduanya.
 
 **3.2** Memicu error: override `noteRepositoryProvider` dengan repo yang melempar exception, atau sementara ubah nama tabel di `fetchNotes()`.
 
@@ -134,13 +134,13 @@ Saya membuat `notesProvider`, `dirtyCountProvider`, dan `NoteActions` yang selal
 
 | No | Skenario | Hasil aktual | Status (Lulus/Gagal) |
 |---|---|---|---|
-| 1 | Empty state | ⏳ isi setelah uji manual | ⏳ isi setelah uji manual |
-| 2 | Validasi form | ⏳ isi setelah uji manual | ⏳ isi setelah uji manual |
-| 3 | Tambah catatan | ⏳ isi setelah uji manual | ⏳ isi setelah uji manual |
-| 4 | Ubah catatan | ⏳ isi setelah uji manual | ⏳ isi setelah uji manual |
-| 5 | Hapus | ⏳ isi setelah uji manual | ⏳ isi setelah uji manual |
-| 6 | Error state | ⏳ isi setelah uji manual | ⏳ isi setelah uji manual |
-| 7 | Mode pesawat | ⏳ isi setelah uji manual | ⏳ isi setelah uji manual |
+| 1 | Empty state | â³ isi setelah uji manual | â³ isi setelah uji manual |
+| 2 | Validasi form | â³ isi setelah uji manual | â³ isi setelah uji manual |
+| 3 | Tambah catatan | â³ isi setelah uji manual | â³ isi setelah uji manual |
+| 4 | Ubah catatan | â³ isi setelah uji manual | â³ isi setelah uji manual |
+| 5 | Hapus | â³ isi setelah uji manual | â³ isi setelah uji manual |
+| 6 | Error state | â³ isi setelah uji manual | â³ isi setelah uji manual |
+| 7 | Mode pesawat | â³ isi setelah uji manual | â³ isi setelah uji manual |
 
 ---
 
@@ -148,31 +148,31 @@ Saya membuat `notesProvider`, `dirtyCountProvider`, dan `NoteActions` yang selal
 
 Saya menambahkan `forceOfflineProvider`, `syncNotes` + `resolveConflict`, `PostRepository` (transaksi + batch), `PostsNotifier` cache-first, tombol Posts/Sinkronkan, dan saklar force offline di pengaturan.
 
-**File:** `lib/data/sync.dart`, `lib/providers/post_providers.dart`, `lib/pages/posts_page.dart`, …
+**File:** `lib/data/sync.dart`, `lib/providers/post_providers.dart`, `lib/pages/posts_page.dart`, â€¦
 
 **Screenshot — badge dirty sebelum sync**
 
-<!-- tempel screenshot di sini -->
+![dirty sebelum](screenshots/p4-dirty-sebelum.png)
 
 **Screenshot — sync ditolak (force offline ON)**
 
-<!-- tempel screenshot di sini -->
+![sync ditolak](screenshots/p4-sync-ditolak.png)
 
 **Screenshot — sync berhasil**
 
-<!-- tempel screenshot di sini -->
+![sync berhasil](screenshots/p4-sync-berhasil.png)
 
 **Screenshot — setelah sync (ikon hijau / badge hilang)**
 
-<!-- tempel screenshot di sini -->
+![dirty sesudah](screenshots/p4-dirty-sesudah.png)
 
 **Screenshot — Posts online**
 
-<!-- tempel screenshot di sini -->
+![posts online](screenshots/p4-posts-online.png)
 
 **Screenshot — Posts offline (dari cache)**
 
-<!-- tempel screenshot di sini -->
+![posts offline](screenshots/p4-posts-offline.png)
 
 ### Pertanyaan & Jawaban
 
@@ -188,12 +188,12 @@ Saya menambahkan `forceOfflineProvider`, `syncNotes` + `resolveConflict`, `PostR
 
 | No | Skenario | Hasil aktual | Status (Lulus/Gagal) |
 |---|---|---|---|
-| 1 | Isi cache | ⏳ isi setelah uji manual | ⏳ isi setelah uji manual |
-| 2 | Cache saat offline | ⏳ isi setelah uji manual | ⏳ isi setelah uji manual |
-| 3 | Antrean dirty | ⏳ isi setelah uji manual | ⏳ isi setelah uji manual |
-| 4 | Sync ditolak | ⏳ isi setelah uji manual | ⏳ isi setelah uji manual |
-| 5 | Sync berhasil | ⏳ isi setelah uji manual | ⏳ isi setelah uji manual |
-| 6 | Refresh background | ⏳ isi setelah uji manual | ⏳ isi setelah uji manual |
+| 1 | Isi cache | â³ isi setelah uji manual | â³ isi setelah uji manual |
+| 2 | Cache saat offline | â³ isi setelah uji manual | â³ isi setelah uji manual |
+| 3 | Antrean dirty | â³ isi setelah uji manual | â³ isi setelah uji manual |
+| 4 | Sync ditolak | â³ isi setelah uji manual | â³ isi setelah uji manual |
+| 5 | Sync berhasil | â³ isi setelah uji manual | â³ isi setelah uji manual |
+| 6 | Refresh background | â³ isi setelah uji manual | â³ isi setelah uji manual |
 
 ---
 
@@ -203,7 +203,7 @@ Tujuh test model/sync di `test/note_test.dart` memakai `FakeNoteRepository`; dit
 
 **Screenshot — hasil `flutter test`**
 
-<!-- tempel screenshot di sini -->
+![flutter test](screenshots/p5-flutter-test.png)
 
 ### Keluaran asli
 
@@ -237,7 +237,7 @@ Aplikasi memakai **last-write-wins** berdasarkan `updated_at` di fungsi `resolve
 | Merge per field | Gabung field | Lebih sedikit data hilang | Konflik semantik rumit |
 | Tanya pengguna | Dialog pilih versi | Kontrol penuh | Mengganggu UX |
 
-Alasan memilih LWW: cocok untuk modul single-user / simulasi sync tanpa UI konflik. Kelemahan: jam perangkat; plus `markAllSynced()` bisa race saat edit selama upload → perbaikan `WHERE id = ? AND updated_at = ?` atau **outbox**. Penghapusan langsung tak diketahui server → butuh **tombstone** (`deleted = 1`).
+Alasan memilih LWW: cocok untuk modul single-user / simulasi sync tanpa UI konflik. Kelemahan: jam perangkat; plus `markAllSynced()` bisa race saat edit selama upload â†’ perbaikan `WHERE id = ? AND updated_at = ?` atau **outbox**. Penghapusan langsung tak diketahui server â†’ butuh **tombstone** (`deleted = 1`).
 
 ---
 
@@ -251,11 +251,11 @@ Alasan memilih LWW: cocok untuk modul single-user / simulasi sync tanpa UI konfl
 
 **Temuan verifikasi (5 butir):**
 
-1. Tidak menaruh daftar catatan di SharedPreferences → sesuai  
-2. Skema punya `dirty` + `updatedAt` → sesuai  
-3. Klaim reaktif: benar untuk Hive/Drift; sqflite di project ini reaktif lewat invalidate Riverpod → dikoreksi  
-4. Dry-run Hive+Drift: **Would change 54 dependencies** → boilerplate Drift tinggi, sesuai  
-5. Rekomendasi Hive untuk catatan → **ditolak**; keputusan final: SharedPreferences + **sqflite**
+1. Tidak menaruh daftar catatan di SharedPreferences â†’ sesuai  
+2. Skema punya `dirty` + `updatedAt` â†’ sesuai  
+3. Klaim reaktif: benar untuk Hive/Drift; sqflite di project ini reaktif lewat invalidate Riverpod â†’ dikoreksi  
+4. Dry-run Hive+Drift: **Would change 54 dependencies** â†’ boilerplate Drift tinggi, sesuai  
+5. Rekomendasi Hive untuk catatan â†’ **ditolak**; keputusan final: SharedPreferences + **sqflite**
 
 ---
 
@@ -265,14 +265,14 @@ Alasan memilih LWW: cocok untuk modul single-user / simulasi sync tanpa UI konfl
 
 **Screenshot — NoteTile chip belum tersinkron**
 
-<!-- tempel screenshot di sini -->
+![notetile chip](screenshots/refactor-notetile-chip.png)
 
 2. Pisah tanggung jawab repo/sync — commit `refactor(data): pisahkan tanggung jawab repository dan sync`
 3. Detail + GoRouter — commit `feat(router): halaman detail catatan dengan GoRouter`
 
 **Screenshot — halaman detail catatan**
 
-<!-- tempel screenshot di sini -->
+![detail catatan](screenshots/refactor-detail-page.png)
 
 ---
 
@@ -294,8 +294,8 @@ Alasan memilih LWW: cocok untuk modul single-user / simulasi sync tanpa UI konfl
 
 ## Checklist Verifikasi Mandiri
 
-- [x] `flutter analyze` → No issues found!
-- [x] `flutter test` → 10 test lulus
+- [x] `flutter analyze` â†’ No issues found!
+- [x] `flutter test` â†’ 10 test lulus
 - [x] Tidak ada import `sqflite` / `shared_preferences` di `lib/pages/` & `lib/widgets/`
 - [x] Tidak ada definisi provider di `lib/pages/`
 - [ ] Badge dirty sebelum/sesudah sync, posts tanpa internet, mode pesawat — **perlu uji manual**
@@ -305,9 +305,10 @@ Alasan memilih LWW: cocok untuk modul single-user / simulasi sync tanpa UI konfl
 ## Catatan Adaptasi
 
 - File `_ref/modul-referensi.md` tidak tersedia di repo; implementasi mengikuti `MASTER_PROMPT_CURSOR_week5_offline_notes.md`.
-- Riverpod 3.4.3 **tidak** menyediakan `StateProvider` → diganti `NotifierProvider` (`ForceOfflineNotifier`).
+- Riverpod 3.4.3 **tidak** menyediakan `StateProvider` â†’ diganti `NotifierProvider` (`ForceOfflineNotifier`).
 - `go_router` 18.x dipakai untuk rute `/`, `/note/:id`, `/posts`, `/settings`.
-- Build Android: `kotlin.incremental=false` di `android/gradle.properties` untuk menghindari error Kotlin cache beda drive (C: pub-cache vs D: project).
+- Build Android: `kotlin.incremental=false` + heap Gradle diturunkan (`-Xmx1536m`) di `android/gradle.properties` — sebelumnya daemon crash OOM karena `-Xmx8G` sementara disk C: hampir penuh.
+- Flutter Web: sqflite diganti `MemoryNoteRepository` / `MemoryPostRepository` (hanya `kIsWeb`) agar bisa demo & ambil screenshot.
 
 ---
 
@@ -318,4 +319,5 @@ Hal terpenting yang saya pelajari adalah memisahkan UI dari storage lewat reposi
 ## Dokumentasi tambahan
 
 - [docs/uji-offline.md](docs/uji-offline.md)
-- Tag git: `praktikum-0` … `praktikum-7`, `praktikum-9`
+- Tag git: `praktikum-0` â€¦ `praktikum-7`, `praktikum-9`
+
