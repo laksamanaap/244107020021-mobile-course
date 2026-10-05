@@ -5,6 +5,7 @@ import '../data/local/note.dart';
 import '../data/sync.dart';
 import '../providers/note_providers.dart';
 import '../widgets/note_form_dialog.dart';
+import '../widgets/note_tile.dart';
 import 'posts_page.dart';
 import 'settings_page.dart';
 
@@ -134,19 +135,10 @@ class NotesPage extends ConsumerWidget {
             separatorBuilder: (_, _) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final note = notes[index];
-              return ListTile(
-                title: Text(note.title),
-                subtitle: Text(
-                  note.content,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete_outline),
-                  onPressed: () =>
-                      ref.read(noteActionsProvider).delete(note.id!),
-                ),
+              return NoteTile(
+                note: note,
                 onTap: () => _openForm(context, ref, note: note),
+                onDelete: () => ref.read(noteActionsProvider).delete(note.id!),
               );
             },
           );
