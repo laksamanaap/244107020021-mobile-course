@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'data/prefs.dart';
-import 'pages/settings_page.dart';
+import 'pages/notes_page.dart';
 import 'providers/prefs_providers.dart';
 
 Future<void> main() async {
@@ -41,7 +41,7 @@ class OfflineNotesApp extends ConsumerWidget {
         useMaterial3: true,
       ),
       themeMode: (darkMode.value ?? false) ? ThemeMode.dark : ThemeMode.light,
-      home: const SettingsPage(),
+      home: const NotesPage(),
     );
   }
 }
