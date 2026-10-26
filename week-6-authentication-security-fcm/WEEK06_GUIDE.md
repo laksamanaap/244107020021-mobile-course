@@ -578,3 +578,132 @@ Setelah praktikum selesai, berikan laporan:
 - Log atau output pemeriksaan yang relevan tanpa membocorkan token.
 
 Mulai dari Tahap 1 — Audit Project Flutter. Jangan langsung mengubah banyak file sebelum memahami kondisi project. Setelah setiap tahap yang membutuhkan tindakan manual saya, berhenti dan tunggu konfirmasi saya sebelum melanjutkan.
+
+
+# MASTER PROMPT 05 — PRAKTIKUM 03
+## Notification Permission dan Inisialisasi Local Notification
+
+### 1. Konteks
+
+Saya sedang mengerjakan codelab Flutter Minggu 6 dari JTI Politeknik Negeri Malang.
+
+**Sumber materi resmi:**
+https://jti-polinema.github.io/flutter-codelab/06-minggu-6-authentication-security-fcm/index.html#4
+
+Lanjutkan project Flutter yang sama dari praktikum sebelumnya. Firebase sudah dikonfigurasi atau sedang dalam proses konfigurasi pada tahap sebelumnya.
+
+Tugas kamu adalah membaca bagian materi yang ditunjuk oleh URL tersebut, memastikan cakupan praktikum yang benar, lalu mengimplementasikannya langsung pada workspace Cursor.
+
+Jangan hanya menjelaskan teori atau memberikan potongan kode untuk saya salin manual.
+
+### 2. Aturan Sebelum Implementasi
+
+1. Baca materi resmi pada link yang diberikan.
+2. Identifikasi judul dan instruksi praktikum yang tepat pada bagian tersebut.
+3. Periksa implementasi Firebase dan FCM dari praktikum sebelumnya.
+4. Periksa `pubspec.yaml`, `lib/main.dart`, `lib/messaging/push_service.dart`, dan konfigurasi Android yang relevan.
+5. Pertahankan kode yang sudah benar.
+6. Jika Firebase belum selesai dikonfigurasi, identifikasi bagian yang masih kurang dan pandu saya menyelesaikannya terlebih dahulu.
+7. Jangan mengulang setup Firebase dari nol jika konfigurasi sebelumnya sudah benar.
+
+**Penting:** Jangan mengasumsikan isi bagian hanya berdasarkan nomor URL. Pastikan cakupan pekerjaan sesuai dengan materi resmi yang benar-benar ditampilkan.
+
+### 3. Target Implementasi
+
+Jika sesuai dengan bagian materi yang ditunjuk, implementasikan fitur berikut.
+
+#### A. Notification permission
+
+- Gunakan `FirebaseMessaging.instance.requestPermission()`.
+- Periksa status izin yang dikembalikan Firebase Messaging.
+- Tangani status `authorized`, `provisional` jika relevan, dan izin yang ditolak.
+- Pastikan aplikasi tidak crash ketika pengguna menolak izin.
+- Sesuaikan perilaku dengan platform yang digunakan.
+- Perhatikan izin notifikasi Android 13+ dan perbedaan perilaku iOS.
+
+Jangan menganggap izin notifikasi diberikan secara otomatis.
+
+#### B. Inisialisasi local notification
+
+Jika termasuk cakupan materi, gunakan package `flutter_local_notifications` untuk menyiapkan notifikasi lokal.
+
+- Periksa apakah package sudah tersedia.
+- Inisialisasikan plugin dengan konfigurasi platform yang sesuai.
+- Gunakan ikon notifikasi Android yang valid.
+- Siapkan callback untuk menangani klik notifikasi.
+- Pastikan inisialisasi tidak dilakukan berulang kali secara tidak perlu.
+- Jangan membuat nama resource atau ikon yang tidak tersedia di project.
+
+#### C. Integrasi dengan PushService
+
+Tempatkan logika notifikasi pada struktur yang sesuai dengan project, terutama `lib/messaging/push_service.dart`.
+
+- Hindari menumpuk seluruh logika notifikasi di `main.dart`.
+- Pertahankan pemisahan tanggung jawab antarkomponen.
+- Pastikan implementasi tidak merusak login, Riverpod, GoRouter, atau token storage.
+- Jangan mencetak FCM token lengkap ke log.
+
+#### D. Persiapan pengujian
+
+Siapkan cara memverifikasi bahwa:
+- Permintaan izin dapat dijalankan.
+- Status izin dapat ditangani dengan benar.
+- Inisialisasi local notification tidak menghasilkan error.
+- Callback klik notifikasi dapat diproses jika fitur tersebut sudah termasuk materi.
+
+Bedakan hasil yang telah diuji langsung dari hasil yang baru diverifikasi melalui kode.
+
+### 4. Batasan Pengerjaan
+
+- Ikuti cakupan materi pada link `#4`.
+- Jangan mengulang implementasi praktikum sebelumnya.
+- Jangan mengimplementasikan seluruh fitur FCM sekaligus jika belum termasuk bagian ini.
+- Jangan mengimplementasikan deep link lengkap, semua app state, atau topic messaging lebih awal kecuali memang diminta pada bagian yang sedang dikerjakan.
+- Jangan membuat backend atau endpoint palsu.
+- Jangan menambahkan dependensi yang sudah tersedia.
+- Jangan mengubah konfigurasi Firebase yang telah benar tanpa alasan teknis.
+- Jangan menghapus kode yang masih digunakan.
+- Jangan mengklaim pengujian berhasil jika belum benar-benar dilakukan.
+- Jika memerlukan tindakan manual di Firebase Console atau perangkat Android, berikan instruksi yang jelas dan tunggu konfirmasi saya.
+
+### 5. Verifikasi
+
+Jalankan pemeriksaan yang relevan, misalnya:
+
+- `flutter pub get` jika dependensi berubah.
+- `flutter analyze`.
+- Build Android jika memungkinkan.
+- Pengujian manual pada perangkat atau emulator yang mendukung Firebase Messaging.
+
+Jika muncul error:
+1. Identifikasi penyebabnya.
+2. Perbaiki masalah yang berkaitan dengan praktikum ini.
+3. Jalankan kembali pemeriksaan yang relevan.
+4. Laporkan error yang belum dapat diselesaikan.
+
+### 6. Laporan Hasil
+
+Setelah selesai, berikan laporan dengan format:
+
+**A. Cakupan Materi**
+- Judul bagian resmi yang dikerjakan.
+- Tujuan implementasi.
+
+**B. Perubahan Kode**
+- File yang dibuat atau diubah.
+- Fungsi masing-masing file.
+
+**C. Hasil Verifikasi**
+- Perintah yang dijalankan.
+- Hasil analisis dan build.
+- Hasil pengujian yang benar-benar diamati.
+
+**D. Pengujian Manual**
+- Langkah yang perlu saya lakukan.
+- Screenshot atau bukti yang perlu disiapkan.
+
+**E. Kendala**
+- Fitur yang belum selesai.
+- Penyebab dan tindakan berikutnya.
+
+Kerjakan praktikum pada bagian ini saja. Setelah selesai, berhenti dan tunggu instruksi saya untuk melanjutkan ke bagian berikutnya.

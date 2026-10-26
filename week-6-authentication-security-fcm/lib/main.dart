@@ -10,6 +10,8 @@ import 'kelas_session.dart';
 import 'lms_content.dart';
 import 'location_map_page.dart';
 import 'data/token_store.dart';
+import 'messaging/push_service.dart';
+import 'pages/announcement_page.dart';
 import 'pages/login_page.dart';
 import 'providers/auth_provider.dart';
 import 'spotify_home_page.dart';
@@ -43,6 +45,12 @@ final routerProvider = Provider<GoRouter>((ref) {
           return MusicPlayboxPage(cameras: ref.read(camerasProvider));
         },
       ),
+      GoRoute(
+        path: '/pengumuman/:id',
+        builder: (context, state) {
+          return AnnouncementPage(id: state.pathParameters['id'] ?? '');
+        },
+      ),
     ],
   );
   ref.onDispose(router.dispose);
@@ -51,6 +59,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await bootstrapFirebaseAndPush();
 
   List<CameraDescription> cameras = [];
   try {
@@ -81,11 +90,26 @@ class MyAppWeek6 extends StatelessWidget {
   }
 }
 
-class _CampusApp extends ConsumerWidget {
+class _CampusApp extends ConsumerStatefulWidget {
   const _CampusApp();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_CampusApp> createState() => _CampusAppState();
+}
+
+class _CampusAppState extends ConsumerState<_CampusApp> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      PushService.instance.bindRouter((route) {
+        ref.read(routerProvider).go(route);
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
@@ -449,6 +473,93 @@ class _MusicPlayboxPageState extends State<MusicPlayboxPage> {
                     );
                   }
                 },
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          ValueListenableBuilder<FcmStatus>(
+            valueListenable: PushService.instance.status,
+            builder: (context, fcm, _) {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.card,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppTheme.hairline),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Firebase Cloud Messaging',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.text,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Izin: ${fcm.permissionLabel}',
+                      style: const TextStyle(
+                        color: AppTheme.muted,
+                        fontSize: 13,
+                      ),
+                    ),
+                    Text(
+                      'Token: ${fcm.tokenPreview}',
+                      style: const TextStyle(
+                        color: AppTheme.muted,
+                        fontSize: 13,
+                      ),
+                    ),
+                    Text(
+                      'Topik: ${fcm.topicLabel}',
+                      style: const TextStyle(
+                        color: AppTheme.muted,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      fcm.backendNote,
+                      style: const TextStyle(
+                        color: AppTheme.muted,
+                        fontSize: 12,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.tonal(
+                        onPressed: () async {
+                          try {
+                            await PushService.instance.showDemoNotification();
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Banner lokal dikirim. Ketuk notifikasi untuk buka pengumuman.',
+                                ),
+                              ),
+                            );
+                          } catch (_) {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Gagal menampilkan banner lokal. Cek izin notifikasi.',
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        child: const Text('Uji notifikasi lokal'),
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           ),
