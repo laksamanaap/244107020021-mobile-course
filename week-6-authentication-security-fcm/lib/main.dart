@@ -1,5 +1,7 @@
 ﻿import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'app_theme.dart';
@@ -7,7 +9,45 @@ import 'camera_home_page.dart';
 import 'kelas_session.dart';
 import 'lms_content.dart';
 import 'location_map_page.dart';
+import 'data/token_store.dart';
+import 'pages/login_page.dart';
+import 'providers/auth_provider.dart';
 import 'spotify_home_page.dart';
+
+final camerasProvider = Provider<List<CameraDescription>>((ref) => const []);
+
+final routerProvider = Provider<GoRouter>((ref) {
+  final refresh = ValueNotifier<int>(0);
+  ref.listen(authStateProvider, (_, _) {
+    refresh.value++;
+  });
+  ref.onDispose(refresh.dispose);
+
+  final router = GoRouter(
+    initialLocation: '/login',
+    refreshListenable: refresh,
+    redirect: (context, state) {
+      final auth = ref.read(authStateProvider);
+      if (auth.isLoading) return null;
+      final loggedIn = auth.value ?? false;
+      final goingLogin = state.matchedLocation == '/login';
+      if (!loggedIn && !goingLogin) return '/login';
+      if (loggedIn && goingLogin) return '/';
+      return null;
+    },
+    routes: [
+      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+      GoRoute(
+        path: '/',
+        builder: (context, state) {
+          return MusicPlayboxPage(cameras: ref.read(camerasProvider));
+        },
+      ),
+    ],
+  );
+  ref.onDispose(router.dispose);
+  return router;
+});
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,13 +63,31 @@ Future<void> main() async {
 }
 
 class MyAppWeek6 extends StatelessWidget {
-  const MyAppWeek6({super.key, this.cameras = const []});
+  const MyAppWeek6({super.key, this.cameras = const [], this.tokenStore});
 
   final List<CameraDescription> cameras;
+  final TokenStore? tokenStore;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return ProviderScope(
+      overrides: [
+        camerasProvider.overrideWithValue(cameras),
+        if (tokenStore != null)
+          tokenStoreProvider.overrideWithValue(tokenStore!),
+      ],
+      child: const _CampusApp(),
+    );
+  }
+}
+
+class _CampusApp extends ConsumerWidget {
+  const _CampusApp();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Campus LMS',
       theme: ThemeData(
@@ -47,7 +105,7 @@ class MyAppWeek6 extends StatelessWidget {
         ),
         dividerColor: AppTheme.hairline,
       ),
-      home: MusicPlayboxPage(cameras: cameras),
+      routerConfig: router,
     );
   }
 }
@@ -354,6 +412,62 @@ class _MusicPlayboxPageState extends State<MusicPlayboxPage> {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const LocationMapPage()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          Consumer(
+            builder: (context, ref, _) {
+              return _DemoLaunchCard(
+                icon: Icons.verified_user_outlined,
+                title: 'Uji request terlindungi',
+                subtitle: 'Simulasi 401, refresh token, lalu ulang sekali',
+                onTap: () async {
+                  try {
+                    final data = await ref
+                        .read(campusApiProvider)
+                        .fetchProtected();
+                    if (!context.mounted) return;
+                    final ok = data['ok'] == true;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          ok
+                              ? 'Request lolos (mock). Header Bearer dipakai; 401 di-refresh sekali.'
+                              : 'Request selesai tanpa ok=true.',
+                        ),
+                      ),
+                    );
+                  } catch (_) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Request gagal. Sesi dibersihkan jika refresh mati.',
+                        ),
+                      ),
+                    );
+                  }
+                },
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          Consumer(
+            builder: (context, ref, _) {
+              return SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () =>
+                      ref.read(authStateProvider.notifier).logout(),
+                  icon: const Icon(Icons.logout_rounded),
+                  label: const Text('Keluar'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.brandDeep,
+                    minimumSize: const Size.fromHeight(48),
+                    side: const BorderSide(color: AppTheme.hairline),
+                  ),
+                ),
               );
             },
           ),
