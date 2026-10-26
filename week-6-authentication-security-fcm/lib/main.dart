@@ -10,10 +10,12 @@ import 'kelas_session.dart';
 import 'lms_content.dart';
 import 'location_map_page.dart';
 import 'data/token_store.dart';
+import 'data/api_errors.dart';
 import 'messaging/push_service.dart';
 import 'pages/announcement_page.dart';
 import 'pages/login_page.dart';
 import 'providers/auth_provider.dart';
+import 'routes.dart';
 import 'spotify_home_page.dart';
 
 final camerasProvider = Provider<List<CameraDescription>>((ref) => const []);
@@ -26,27 +28,30 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.onDispose(refresh.dispose);
 
   final router = GoRouter(
-    initialLocation: '/login',
+    initialLocation: AppRoutes.login,
     refreshListenable: refresh,
     redirect: (context, state) {
       final auth = ref.read(authStateProvider);
       if (auth.isLoading) return null;
       final loggedIn = auth.value ?? false;
-      final goingLogin = state.matchedLocation == '/login';
-      if (!loggedIn && !goingLogin) return '/login';
-      if (loggedIn && goingLogin) return '/';
+      final goingLogin = state.matchedLocation == AppRoutes.login;
+      if (!loggedIn && !goingLogin) return AppRoutes.login;
+      if (loggedIn && goingLogin) return AppRoutes.home;
       return null;
     },
     routes: [
-      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       GoRoute(
-        path: '/',
+        path: AppRoutes.login,
+        builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.home,
         builder: (context, state) {
           return MusicPlayboxPage(cameras: ref.read(camerasProvider));
         },
       ),
       GoRoute(
-        path: '/pengumuman/:id',
+        path: AppRoutes.pengumuman,
         builder: (context, state) {
           return AnnouncementPage(id: state.pathParameters['id'] ?? '');
         },
@@ -462,14 +467,10 @@ class _MusicPlayboxPageState extends State<MusicPlayboxPage> {
                         ),
                       ),
                     );
-                  } catch (_) {
+                  } catch (error) {
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Request gagal. Sesi dibersihkan jika refresh mati.',
-                        ),
-                      ),
+                      SnackBar(content: Text(messageFromDio(error))),
                     );
                   }
                 },

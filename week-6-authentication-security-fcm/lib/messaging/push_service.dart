@@ -6,7 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-import 'message_route.dart';
+import '../routes.dart';
 
 /// Handler background WAJIB top-level + pragma. Jangan akses BuildContext,
 /// GoRouter, atau Riverpod di sini (isolate terpisah).
@@ -173,7 +173,7 @@ class PushService {
           priority: Priority.high,
         ),
       ),
-      payload: '/pengumuman/lokal',
+      payload: AppRoutes.pengumumanId('lokal'),
     );
   }
 
