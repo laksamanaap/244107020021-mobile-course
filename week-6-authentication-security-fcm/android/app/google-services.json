@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "212746615058",
+    "project_id": "authentication-security-fcm",
+    "storage_bucket": "authentication-security-fcm.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:212746615058:android:36fc1a01150465dcde9bcb",
+        "android_client_info": {
+          "package_name": "com.example.week6_authentication_security_fcm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDQPVvDYpK4P_mcD3AkpfSVE4s7GXLuNc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
