@@ -73,6 +73,7 @@ class PushService {
   static const _jokowiSound = RawResourceAndroidNotificationSound(
     'hidupjokowi',
   );
+  static const _appIcon = DrawableResourceAndroidBitmap('ic_launcher');
 
   final ValueNotifier<FcmStatus> status = ValueNotifier(FcmStatus.idle);
   final FlutterLocalNotificationsPlugin _local =
@@ -323,6 +324,8 @@ class PushService {
         channelList,
         'Kotak masuk',
         channelDescription: 'Pengumuman yang masuk daftar in-app',
+        icon: '@mipmap/ic_launcher',
+        largeIcon: _appIcon,
         importance: Importance.defaultImportance,
         priority: Priority.defaultPriority,
         playSound: false,
@@ -331,6 +334,8 @@ class PushService {
         channelIcon,
         'Ikon status bar',
         channelDescription: 'Ikon di status bar tanpa suara',
+        icon: '@mipmap/ic_launcher',
+        largeIcon: _appIcon,
         importance: Importance.low,
         priority: Priority.low,
         playSound: false,
@@ -342,6 +347,8 @@ class PushService {
         channelSound,
         'Pengumuman bersuara',
         channelDescription: 'Heads-up plus Hidup Jokowi',
+        icon: '@mipmap/ic_launcher',
+        largeIcon: _appIcon,
         importance: Importance.max,
         priority: Priority.max,
         playSound: true,
