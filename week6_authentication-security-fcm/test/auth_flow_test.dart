@@ -48,7 +48,7 @@ void main() {
     var expired = 0;
     final dio = buildApiClient(
       store,
-      AuthRepository(),
+      auth: AuthRepository(),
       onSessionExpired: () async => expired++,
       adapter: spy,
     );
@@ -71,7 +71,7 @@ void main() {
       refresh: 'mock-refresh-for-a@b.c',
     );
     final spy = _HeaderSpyAdapter(CampusMockAdapter());
-    final dio = buildApiClient(store, AuthRepository(), adapter: spy);
+    final dio = buildApiClient(store, auth: AuthRepository(), adapter: spy);
     await dio.get('/protected');
     final renewed = store.access;
     final res = await dio.get('/protected');
@@ -87,7 +87,7 @@ void main() {
     final store = MemoryTokenStore();
     await store.save(access: 'acc', refresh: 'ref');
     final adapter = _Always401Adapter();
-    final dio = buildApiClient(store, AuthRepository(), adapter: adapter);
+    final dio = buildApiClient(store, auth: AuthRepository(), adapter: adapter);
 
     await expectLater(dio.get('/protected'), throwsA(isA<DioException>()));
     expect(adapter.fetches, 2);
@@ -100,7 +100,7 @@ void main() {
     final adapter = _Always401Adapter();
     final dio = buildApiClient(
       store,
-      AuthRepository(),
+      auth: AuthRepository(),
       onSessionExpired: () async => expired++,
       adapter: adapter,
     );
@@ -109,6 +109,23 @@ void main() {
     expect(adapter.fetches, 1);
     expect(store.access, isNull);
     expect(store.refresh, isNull);
+    expect(expired, 1);
+  });
+
+  test('401 Sanctum tanpa refresh mengakhiri sesi sekali', () async {
+    final store = MemoryTokenStore();
+    await store.save(access: 'sanctum-token', refresh: '');
+    var expired = 0;
+    final adapter = _Always401Adapter();
+    final dio = buildApiClient(
+      store,
+      onSessionExpired: () async => expired++,
+      adapter: adapter,
+    );
+
+    await expectLater(dio.get('/api/me'), throwsA(isA<DioException>()));
+    expect(adapter.fetches, 1);
+    expect(store.access, isNull);
     expect(expired, 1);
   });
 

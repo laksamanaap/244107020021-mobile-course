@@ -13,7 +13,7 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _email = TextEditingController(text: 'mahasiswa@jti.polinema.ac.id');
-  final _password = TextEditingController();
+  final _password = TextEditingController(text: 'password');
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -123,15 +123,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ),
                     )
                   : const Text('Masuk'),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Ini mock login. Token yang tersimpan adalah simulasi, bukan JWT server.',
-              style: TextStyle(
-                color: AppTheme.muted,
-                fontSize: 12,
-                height: 1.4,
-              ),
             ),
           ],
         ),

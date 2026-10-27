@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'messaging/inbox_service.dart';
+
 /// Design system LMS kampus — terang, teal, dipakai di Beranda / Kelas / Kursus / Profil.
 abstract final class AppTheme {
   static const brand = Color(0xFF1B7A8F);
@@ -38,7 +40,11 @@ abstract final class AppTheme {
     );
   }
 
-  static AppBar appBar(String title, {List<Widget>? actions}) {
+  static AppBar appBar(
+    String title, {
+    List<Widget>? actions,
+    Widget? leading,
+  }) {
     return AppBar(
       title: Text(
         title,
@@ -51,6 +57,8 @@ abstract final class AppTheme {
       backgroundColor: headerBg,
       elevation: 0,
       centerTitle: true,
+      leading: leading,
+      automaticallyImplyLeading: leading == null,
       iconTheme: const IconThemeData(color: text),
       actions: actions,
       bottom: const PreferredSize(
@@ -63,10 +71,16 @@ abstract final class AppTheme {
 
 /// Header sticky: avatar mahasiswa + judul + notifikasi/riwayat.
 class AppStickyHeader extends StatelessWidget {
-  const AppStickyHeader({super.key, required this.title, this.onAvatarTap});
+  const AppStickyHeader({
+    super.key,
+    required this.title,
+    this.onAvatarTap,
+    this.onBellTap,
+  });
 
   final String title;
   final VoidCallback? onAvatarTap;
+  final VoidCallback? onBellTap;
 
   @override
   Widget build(BuildContext context) {
@@ -120,13 +134,22 @@ class AppStickyHeader extends StatelessWidget {
                         ),
                       ),
                     ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.notifications_none_rounded,
-                        color: AppTheme.text,
-                      ),
-                      tooltip: 'Pengumuman',
+                    ValueListenableBuilder<List<CampusInboxItem>>(
+                      valueListenable: InboxService.instance.unread,
+                      builder: (context, items, _) {
+                        return IconButton(
+                          onPressed: onBellTap,
+                          tooltip: 'Notifikasi',
+                          icon: Badge(
+                            isLabelVisible: items.isNotEmpty,
+                            label: Text('${items.length}'),
+                            child: const Icon(
+                              Icons.notifications_none_rounded,
+                              color: AppTheme.text,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                     IconButton(
                       onPressed: () {},

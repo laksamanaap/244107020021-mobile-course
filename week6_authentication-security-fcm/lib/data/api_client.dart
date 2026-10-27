@@ -3,25 +3,33 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
+import 'api_config.dart';
 import 'auth_repository.dart';
 import 'token_store.dart';
 
 const _retriedKey = 'auth_retried';
 
 Dio buildApiClient(
-  TokenStore store,
-  AuthRepository auth, {
+  TokenStore store, {
+  AuthRepository? auth,
   Future<void> Function()? onSessionExpired,
   HttpClientAdapter? adapter,
+  String? baseUrl,
 }) {
   final dio = Dio(
     BaseOptions(
-      baseUrl: 'https://example-campus-api.test',
+      baseUrl: baseUrl ?? campusApiBaseUrl,
       connectTimeout: const Duration(seconds: 8),
       receiveTimeout: const Duration(seconds: 8),
+      headers: const {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
     ),
   );
-  dio.httpClientAdapter = adapter ?? CampusMockAdapter();
+  if (adapter != null) {
+    dio.httpClientAdapter = adapter;
+  }
   dio.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) async {
@@ -33,9 +41,10 @@ Dio buildApiClient(
       },
       onError: (e, handler) async {
         final alreadyRetried = e.requestOptions.extra[_retriedKey] == true;
-        if (e.response?.statusCode == 401 && !alreadyRetried) {
+        final isLogin = e.requestOptions.path.contains('/login');
+        if (e.response?.statusCode == 401 && !alreadyRetried && !isLogin) {
           final refresh = await store.readRefresh();
-          if (refresh == null || refresh.isEmpty) {
+          if (refresh == null || refresh.isEmpty || auth == null) {
             await store.clear();
             await onSessionExpired?.call();
             return handler.next(e);
@@ -59,7 +68,7 @@ Dio buildApiClient(
   return dio;
 }
 
-/// Adapter simulasi: tidak ada backend sungguhan di praktikum ini.
+/// Adapter simulasi: tidak ada backend sungguhan di unit test interceptor.
 /// Request pertama ke /protected memakai access token awal → 401,
 /// retry setelah refresh → 200.
 class CampusMockAdapter implements HttpClientAdapter {
@@ -111,5 +120,45 @@ class CampusApi {
   Future<Map<String, dynamic>> fetchProtected() async {
     final res = await _dio.get<Map<String, dynamic>>('/protected');
     return Map<String, dynamic>.from(res.data ?? const {});
+  }
+
+  Future<Map<String, dynamic>> fetchMe() async {
+    final res = await _dio.get<Map<String, dynamic>>('/api/me');
+    return Map<String, dynamic>.from(res.data ?? const {});
+  }
+
+  Future<List<Map<String, dynamic>>> listNotifications() async {
+    final res = await _dio.get<Map<String, dynamic>>('/api/notifications');
+    final data = res.data?['data'];
+    if (data is! List) return const [];
+    return data
+        .whereType<Map>()
+        .map((row) => Map<String, dynamic>.from(row))
+        .toList();
+  }
+
+  Future<Map<String, dynamic>> createNotification({
+    required String type,
+    required String title,
+    String? body,
+    String? route,
+  }) async {
+    final res = await _dio.post<Map<String, dynamic>>(
+      '/api/notifications',
+      data: {
+        'type': type,
+        'title': title,
+        'body': ?body,
+        'route': ?route,
+      },
+    );
+    final data = res.data?['data'];
+    if (data is Map<String, dynamic>) return data;
+    if (data is Map) return Map<String, dynamic>.from(data);
+    return Map<String, dynamic>.from(res.data ?? const {});
+  }
+
+  Future<void> markNotificationRead(int id) async {
+    await _dio.patch<Map<String, dynamic>>('/api/notifications/$id/read');
   }
 }

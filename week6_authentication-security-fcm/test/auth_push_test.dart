@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:week6_authentication_security_fcm/data/api_errors.dart';
+import 'package:week6_authentication_security_fcm/messaging/notif_kind.dart';
 import 'package:week6_authentication_security_fcm/routes.dart';
 
 class FakeTokenStore {
@@ -16,6 +17,21 @@ void main() {
       routeFromMessage({'route': AppRoutes.pengumumanId('3')}),
       AppRoutes.pengumumanId('3'),
     );
+  });
+
+  test('FCM type=list membuka kotak masuk, type lain mengikuti route', () {
+    expect(
+      routeFromMessage({'type': 'list', 'route': '/pengumuman/9'}),
+      AppRoutes.notifications,
+    );
+    expect(
+      routeFromMessage({'type': 'sound', 'route': '/pengumuman/3'}),
+      AppRoutes.pengumumanId('3'),
+    );
+    expect(notifKindFromMessage({'type': 'list'}), NotifKind.list);
+    expect(notifKindFromMessage({'type': 'icon'}), NotifKind.icon);
+    expect(notifKindFromMessage({'type': 'sound'}), NotifKind.sound);
+    expect(notifKindFromMessage({}), NotifKind.sound);
   });
 
   test('data payload membawa id pengumuman', () {

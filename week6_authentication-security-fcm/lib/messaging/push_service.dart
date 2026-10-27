@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../routes.dart';
+import 'inbox_service.dart';
+import 'notif_kind.dart';
 
 /// Handler background WAJIB top-level + pragma. Jangan akses BuildContext,
 /// GoRouter, atau Riverpod di sini (isolate terpisah).
@@ -64,11 +67,17 @@ class PushService {
   static final PushService instance = PushService._();
 
   static const topicKampus = 'pengumuman-kampus';
-  static const _channelId = 'pengumuman';
+  static const channelList = 'notif_list';
+  static const channelIcon = 'notif_icon';
+  static const channelSound = 'notif_sound_jokowi';
+  static const _jokowiSound = RawResourceAndroidNotificationSound(
+    'hidupjokowi',
+  );
 
   final ValueNotifier<FcmStatus> status = ValueNotifier(FcmStatus.idle);
   final FlutterLocalNotificationsPlugin _local =
       FlutterLocalNotificationsPlugin();
+  final AudioPlayer _sfx = AudioPlayer();
 
   bool _initialized = false;
   bool _localReady = false;
@@ -100,8 +109,6 @@ class PushService {
       return;
     }
 
-    // Codelab + Firebase Console masih memakai FCM registration token.
-    // firebase_messaging 17 menandai getToken/onTokenRefresh deprecated
     await _syncToken(await FirebaseMessaging.instance.getToken());
     _tokenRefreshSub ??= FirebaseMessaging.instance.onTokenRefresh.listen(
       _syncToken,
@@ -156,24 +163,29 @@ class PushService {
     }
   }
 
-  /// Banner uji tanpa Firebase Console — membuktikan local notification hidup.
-  Future<void> showDemoNotification() async {
+  /// Cadangan kelas kalau Firebase Console lambat. Sumber utama tetap FCM.
+  Future<void> showDemoNotification({NotifKind kind = NotifKind.sound}) async {
     if (!_localReady) {
       await _initLocalNotifications();
     }
-    await _local.show(
-      id: 9001,
-      title: 'Uji notifikasi lokal',
-      body: 'Ketuk banner ini untuk membuka pengumuman demo.',
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          _channelId,
-          'Pengumuman Kampus',
-          importance: Importance.high,
-          priority: Priority.high,
-        ),
-      ),
-      payload: AppRoutes.pengumumanId('lokal'),
+    const titles = {
+      NotifKind.list: 'Uji list — kotak masuk',
+      NotifKind.icon: 'Uji ikon status bar',
+      NotifKind.sound: 'Uji notifikasi bersuara',
+    };
+    const bodies = {
+      NotifKind.list: 'Buka lonceng. Ketuk item ini supaya hilang.',
+      NotifKind.icon: 'Tanpa suara. Cek ikon di status bar.',
+      NotifKind.sound: 'Heads-up plus Hidup Jokowi. Ketuk untuk buka pengumuman.',
+    };
+    await _present(
+      id: 9000 + kind.index,
+      title: titles[kind]!,
+      body: bodies[kind]!,
+      kind: kind,
+      route: kind == NotifKind.list
+          ? AppRoutes.notifications
+          : AppRoutes.pengumumanId('lokal'),
     );
   }
 
@@ -214,9 +226,35 @@ class PushService {
     await androidPlugin?.requestNotificationsPermission();
     await androidPlugin?.createNotificationChannel(
       const AndroidNotificationChannel(
-        _channelId,
-        'Pengumuman Kampus',
-        importance: Importance.high,
+        channelList,
+        'Kotak masuk',
+        description: 'Pengumuman yang masuk daftar in-app',
+        importance: Importance.defaultImportance,
+        playSound: false,
+      ),
+    );
+    await androidPlugin?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        channelIcon,
+        'Ikon status bar',
+        description: 'Ikon di status bar tanpa suara',
+        importance: Importance.low,
+        playSound: false,
+        enableVibration: false,
+      ),
+    );
+    await androidPlugin?.deleteNotificationChannel(channelId: 'notif_sound');
+    await androidPlugin?.deleteNotificationChannel(channelId: channelSound);
+    await androidPlugin?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        channelSound,
+        'Pengumuman bersuara',
+        description: 'Heads-up plus Hidup Jokowi',
+        importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
+        sound: _jokowiSound,
+        audioAttributesUsage: AudioAttributesUsage.media,
       ),
     );
     _localReady = true;
@@ -226,32 +264,107 @@ class PushService {
     if (token == null || token.isEmpty) {
       status.value = status.value.copyWith(
         tokenPreview: 'tidak tersedia',
-        backendNote: 'Token FCM belum ada. Emulator tanpa Google Play sering gagal; pakai HP fisik.',
+        backendNote:
+            'Token FCM belum ada. Emulator tanpa Google Play sering gagal; pakai HP fisik.',
       );
       return;
     }
     status.value = status.value.copyWith(
       tokenPreview: _preview(token),
       backendNote:
-          'POST /devices dilewati: backend kampus belum tersedia. '
-          'Token tidak dikirim ke example-campus-api.test (mock).',
+          'Langganan topik $topicKampus. Demo ke dosen: Firebase Console → '
+          'Messaging → topic $topicKampus, isi data.type = list / icon / sound. '
+          'Channel Android: $channelList / $channelIcon / $channelSound.',
     );
   }
 
   Future<void> _onForeground(RemoteMessage message) async {
-    const details = AndroidNotificationDetails(
-      _channelId,
-      'Pengumuman Kampus',
-      importance: Importance.high,
-      priority: Priority.high,
-    );
-    await _local.show(
+    final kind = notifKindFromMessage(message.data);
+    final title = message.notification?.title ?? 'Pengumuman';
+    final body = message.notification?.body ?? '';
+    await _present(
       id: message.hashCode,
-      title: message.notification?.title ?? 'Pengumuman',
-      body: message.notification?.body ?? '',
-      notificationDetails: const NotificationDetails(android: details),
-      payload: routeFromMessage(message.data),
+      title: title,
+      body: body,
+      kind: kind,
+      route: routeFromMessage(message.data),
     );
+  }
+
+  Future<void> _present({
+    required int id,
+    required String title,
+    required String body,
+    required NotifKind kind,
+    required String route,
+  }) async {
+    if (kind == NotifKind.list) {
+      await InboxService.instance.ingestList(
+        title: title,
+        body: body,
+        route: route,
+      );
+    }
+    if (kind == NotifKind.sound) {
+      await _playJokowi();
+    }
+    await _local.show(
+      id: id,
+      title: title,
+      body: body,
+      notificationDetails: _detailsFor(kind),
+      payload: route,
+    );
+  }
+
+  NotificationDetails _detailsFor(NotifKind kind) {
+    final android = switch (kind) {
+      NotifKind.list => const AndroidNotificationDetails(
+        channelList,
+        'Kotak masuk',
+        channelDescription: 'Pengumuman yang masuk daftar in-app',
+        importance: Importance.defaultImportance,
+        priority: Priority.defaultPriority,
+        playSound: false,
+      ),
+      NotifKind.icon => const AndroidNotificationDetails(
+        channelIcon,
+        'Ikon status bar',
+        channelDescription: 'Ikon di status bar tanpa suara',
+        importance: Importance.low,
+        priority: Priority.low,
+        playSound: false,
+        enableVibration: false,
+        silent: true,
+        visibility: NotificationVisibility.secret,
+      ),
+      NotifKind.sound => const AndroidNotificationDetails(
+        channelSound,
+        'Pengumuman bersuara',
+        channelDescription: 'Heads-up plus Hidup Jokowi',
+        importance: Importance.max,
+        priority: Priority.max,
+        playSound: true,
+        enableVibration: true,
+        sound: _jokowiSound,
+        audioAttributesUsage: AudioAttributesUsage.media,
+        category: AndroidNotificationCategory.message,
+      ),
+    };
+    final ios = DarwinNotificationDetails(
+      presentAlert: kind != NotifKind.icon,
+      presentBadge: true,
+      presentSound: kind == NotifKind.sound,
+      sound: kind == NotifKind.sound ? 'hidupjokowi.mp3' : null,
+    );
+    return NotificationDetails(android: android, iOS: ios);
+  }
+
+  Future<void> _playJokowi() async {
+    try {
+      await _sfx.stop();
+      await _sfx.play(AssetSource('audio/hidupjokowi.mp3'), volume: 1);
+    } catch (_) {}
   }
 
   void _openFromMessage(RemoteMessage message) {
@@ -284,7 +397,8 @@ Future<void> bootstrapFirebaseAndPush() async {
       permissionLabel: 'error',
       tokenPreview: '—',
       topicLabel: '—',
-      backendNote: 'Firebase gagal diinisialisasi. Cek google-services.json dan Google Play services.',
+      backendNote:
+          'Firebase gagal diinisialisasi. Cek google-services.json dan Google Play services.',
     );
   }
 }

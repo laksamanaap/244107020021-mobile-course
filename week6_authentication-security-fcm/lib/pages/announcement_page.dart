@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../app_theme.dart';
+import '../routes.dart';
 
 class AnnouncementPage extends StatelessWidget {
   const AnnouncementPage({super.key, required this.id});
@@ -11,7 +13,20 @@ class AnnouncementPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.bg,
-      appBar: AppTheme.appBar('Pengumuman'),
+      appBar: AppTheme.appBar(
+        'Pengumuman',
+        leading: IconButton(
+          tooltip: 'Kembali',
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.home);
+            }
+          },
+        ),
+      ),
       body: AppTheme.page(
         safeTop: false,
         child: ListView(

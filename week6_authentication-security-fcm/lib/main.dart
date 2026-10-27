@@ -9,11 +9,15 @@ import 'camera_home_page.dart';
 import 'kelas_session.dart';
 import 'lms_content.dart';
 import 'location_map_page.dart';
+import 'data/auth_repository.dart';
 import 'data/token_store.dart';
 import 'data/api_errors.dart';
 import 'messaging/push_service.dart';
+import 'messaging/inbox_service.dart';
+import 'messaging/notif_kind.dart';
 import 'pages/announcement_page.dart';
 import 'pages/login_page.dart';
+import 'pages/notifications_page.dart';
 import 'providers/auth_provider.dart';
 import 'routes.dart';
 import 'spotify_home_page.dart';
@@ -49,6 +53,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           return MusicPlayboxPage(cameras: ref.read(camerasProvider));
         },
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsPage(),
       ),
       GoRoute(
         path: AppRoutes.pengumuman,
@@ -88,7 +96,11 @@ class MyAppWeek6 extends StatelessWidget {
       overrides: [
         camerasProvider.overrideWithValue(cameras),
         if (tokenStore != null)
-          tokenStoreProvider.overrideWithValue(tokenStore!),
+          tokenStoreProvider.overrideWithValue(tokenStore!)
+        else
+          authRepositoryProvider.overrideWith((ref) {
+            return AuthRepository(dio: ref.watch(apiClientProvider));
+          }),
       ],
       child: const _CampusApp(),
     );
@@ -110,6 +122,22 @@ class _CampusAppState extends ConsumerState<_CampusApp> {
       PushService.instance.bindRouter((route) {
         ref.read(routerProvider).go(route);
       });
+      InboxService.instance.persistCreate = (item) async {
+        final created = await ref
+            .read(campusApiProvider)
+            .createNotification(
+              type: 'list',
+              title: item.title,
+              body: item.body,
+              route: item.route,
+            );
+        return (created['id'] as num?)?.toInt();
+      };
+      InboxService.instance.persistRead = (item) async {
+        final id = item.serverId;
+        if (id == null) return;
+        await ref.read(campusApiProvider).markNotificationRead(id);
+      };
     });
   }
 
@@ -183,7 +211,11 @@ class _MusicPlayboxPageState extends State<MusicPlayboxPage> {
       body: Column(
         children: [
           // Sticky — di luar scroll, tetap di atas
-          AppStickyHeader(title: headerTitle, onAvatarTap: () => _selectTab(3)),
+          AppStickyHeader(
+            title: headerTitle,
+            onAvatarTap: () => _selectTab(3),
+            onBellTap: () => context.go(AppRoutes.notifications),
+          ),
           Expanded(
             child: switch (_navIndex) {
               0 => SpotifyHomePage(onOpenPlaybox: () => _selectTab(1)),
@@ -449,21 +481,20 @@ class _MusicPlayboxPageState extends State<MusicPlayboxPage> {
             builder: (context, ref, _) {
               return _DemoLaunchCard(
                 icon: Icons.verified_user_outlined,
-                title: 'Uji request terlindungi',
-                subtitle: 'Simulasi 401, refresh token, lalu ulang sekali',
+                title: 'Cek sesi GET /api/me',
+                subtitle: 'Request terautentikasi ke Laravel Sanctum',
                 onTap: () async {
                   try {
-                    final data = await ref
-                        .read(campusApiProvider)
-                        .fetchProtected();
+                    final data = await ref.read(campusApiProvider).fetchMe();
                     if (!context.mounted) return;
-                    final ok = data['ok'] == true;
+                    final user = data['user'];
+                    final email = user is Map ? user['email'] : null;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          ok
-                              ? 'Request lolos (mock). Header Bearer dipakai; 401 di-refresh sekali.'
-                              : 'Request selesai tanpa ok=true.',
+                          email == null
+                              ? 'GET /api/me selesai.'
+                              : 'Sesi aktif: $email',
                         ),
                       ),
                     );
@@ -531,32 +562,31 @@ class _MusicPlayboxPageState extends State<MusicPlayboxPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.tonal(
-                        onPressed: () async {
-                          try {
-                            await PushService.instance.showDemoNotification();
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Banner lokal dikirim. Ketuk notifikasi untuk buka pengumuman.',
-                                ),
-                              ),
-                            );
-                          } catch (_) {
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Gagal menampilkan banner lokal. Cek izin notifikasi.',
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                        child: const Text('Uji notifikasi lokal'),
+                    const SizedBox(height: 12),
+                    _FcmDemoButton(
+                      label: 'Cadangan: uji list',
+                      onPressed: () => _runLocalNotif(
+                        context,
+                        NotifKind.list,
+                        'Masuk kotak masuk. Buka lonceng, ketuk item supaya hilang.',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _FcmDemoButton(
+                      label: 'Cadangan: uji ikon',
+                      onPressed: () => _runLocalNotif(
+                        context,
+                        NotifKind.icon,
+                        'Tanpa suara. Cek ikon di status bar.',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _FcmDemoButton(
+                      label: 'Cadangan: uji bersuara',
+                      onPressed: () => _runLocalNotif(
+                        context,
+                        NotifKind.sound,
+                        'Heads-up plus bunyi. Ketuk banner untuk buka pengumuman.',
                       ),
                     ),
                   ],
@@ -614,6 +644,41 @@ class _MusicPlayboxPageState extends State<MusicPlayboxPage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+Future<void> _runLocalNotif(
+  BuildContext context,
+  NotifKind kind,
+  String success,
+) async {
+  try {
+    await PushService.instance.showDemoNotification(kind: kind);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(success)));
+  } catch (_) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Gagal menampilkan banner lokal. Cek izin notifikasi.'),
+      ),
+    );
+  }
+}
+
+class _FcmDemoButton extends StatelessWidget {
+  const _FcmDemoButton({required this.label, required this.onPressed});
+
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.tonal(onPressed: onPressed, child: Text(label)),
     );
   }
 }
