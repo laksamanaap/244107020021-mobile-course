@@ -73,7 +73,10 @@ class PushService {
   static const _jokowiSound = RawResourceAndroidNotificationSound(
     'hidupjokowi',
   );
-  static const _appIcon = DrawableResourceAndroidBitmap('ic_launcher');
+
+  /// Small status-bar glyph lives in drawable (mipmap adaptive XML is invalid).
+  static const _statusIcon = 'ic_stat_notify';
+  static const _appIcon = DrawableResourceAndroidBitmap('ic_notification');
 
   final ValueNotifier<FcmStatus> status = ValueNotifier(FcmStatus.idle);
   final FlutterLocalNotificationsPlugin _local =
@@ -82,6 +85,10 @@ class PushService {
 
   bool _initialized = false;
   bool _localReady = false;
+  String? _registrationToken;
+
+  /// Token lengkap untuk uji Console. Jangan ditampilkan di UI.
+  String? get registrationToken => _registrationToken;
   StreamSubscription<String>? _tokenRefreshSub;
   StreamSubscription<RemoteMessage>? _foregroundSub;
   StreamSubscription<RemoteMessage>? _openedSub;
@@ -169,6 +176,7 @@ class PushService {
     if (!_localReady) {
       await _initLocalNotifications();
     }
+    await _ensureAndroidPostPermission();
     const titles = {
       NotifKind.list: 'Uji list — kotak masuk',
       NotifKind.icon: 'Uji ikon status bar',
@@ -177,7 +185,8 @@ class PushService {
     const bodies = {
       NotifKind.list: 'Buka lonceng. Ketuk item ini supaya hilang.',
       NotifKind.icon: 'Tanpa suara. Cek ikon di status bar.',
-      NotifKind.sound: 'Heads-up plus Hidup Jokowi. Ketuk untuk buka pengumuman.',
+      NotifKind.sound:
+          'Heads-up plus Hidup Jokowi. Ketuk untuk buka pengumuman.',
     };
     await _present(
       id: 9000 + kind.index,
@@ -200,7 +209,7 @@ class PushService {
 
   Future<void> _initLocalNotifications() async {
     if (_localReady) return;
-    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const android = AndroidInitializationSettings(_statusIcon);
     const ios = DarwinInitializationSettings();
     await _local.initialize(
       settings: const InitializationSettings(android: android, iOS: ios),
@@ -225,6 +234,25 @@ class PushService {
           AndroidFlutterLocalNotificationsPlugin
         >();
     await androidPlugin?.requestNotificationsPermission();
+    await _createChannels(androidPlugin);
+    _localReady = true;
+  }
+
+  Future<void> _ensureAndroidPostPermission() async {
+    final androidPlugin = _local
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (androidPlugin == null) return;
+    final enabled = await androidPlugin.areNotificationsEnabled();
+    if (enabled == false) {
+      await androidPlugin.requestNotificationsPermission();
+    }
+  }
+
+  Future<void> _createChannels(
+    AndroidFlutterLocalNotificationsPlugin? androidPlugin,
+  ) async {
     await androidPlugin?.createNotificationChannel(
       const AndroidNotificationChannel(
         channelList,
@@ -250,7 +278,7 @@ class PushService {
       const AndroidNotificationChannel(
         channelSound,
         'Pengumuman bersuara',
-        description: 'Heads-up plus Hidup Jokowi',
+        description: 'Heads-up Hidup Jokowi',
         importance: Importance.max,
         playSound: true,
         enableVibration: true,
@@ -258,24 +286,20 @@ class PushService {
         audioAttributesUsage: AudioAttributesUsage.media,
       ),
     );
-    _localReady = true;
   }
 
   Future<void> _syncToken(String? token) async {
+    _registrationToken = token;
     if (token == null || token.isEmpty) {
       status.value = status.value.copyWith(
         tokenPreview: 'tidak tersedia',
-        backendNote:
-            'Token FCM belum ada. Emulator tanpa Google Play sering gagal; pakai HP fisik.',
+        backendNote: 'Token FCM belum ada. Emulator tanpa Google Play sering gagal; pakai HP fisik.',
       );
       return;
     }
     status.value = status.value.copyWith(
       tokenPreview: _preview(token),
-      backendNote:
-          'Langganan topik $topicKampus. Demo ke dosen: Firebase Console → '
-          'Messaging → topic $topicKampus, isi data.type = list / icon / sound. '
-          'Channel Android: $channelList / $channelIcon / $channelSound.',
+      backendNote: 'Channel: $channelList / $channelIcon / $channelSound.',
     );
   }
 
@@ -324,7 +348,7 @@ class PushService {
         channelList,
         'Kotak masuk',
         channelDescription: 'Pengumuman yang masuk daftar in-app',
-        icon: '@mipmap/ic_launcher',
+        icon: _statusIcon,
         largeIcon: _appIcon,
         importance: Importance.defaultImportance,
         priority: Priority.defaultPriority,
@@ -334,7 +358,7 @@ class PushService {
         channelIcon,
         'Ikon status bar',
         channelDescription: 'Ikon di status bar tanpa suara',
-        icon: '@mipmap/ic_launcher',
+        icon: _statusIcon,
         largeIcon: _appIcon,
         importance: Importance.low,
         priority: Priority.low,
@@ -347,7 +371,7 @@ class PushService {
         channelSound,
         'Pengumuman bersuara',
         channelDescription: 'Heads-up plus Hidup Jokowi',
-        icon: '@mipmap/ic_launcher',
+        icon: _statusIcon,
         largeIcon: _appIcon,
         importance: Importance.max,
         priority: Priority.max,
@@ -404,8 +428,7 @@ Future<void> bootstrapFirebaseAndPush() async {
       permissionLabel: 'error',
       tokenPreview: '—',
       topicLabel: '—',
-      backendNote:
-          'Firebase gagal diinisialisasi. Cek google-services.json dan Google Play services.',
+      backendNote: 'Firebase gagal diinisialisasi. Cek google-services.json dan Google Play services.',
     );
   }
 }

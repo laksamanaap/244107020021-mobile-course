@@ -1,5 +1,6 @@
 ﻿import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -562,7 +563,11 @@ class _MusicPlayboxPageState extends State<MusicPlayboxPage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const SizedBox(height: 12),
+                    _FcmDemoButton(
+                      label: 'Salin token FCM',
+                      onPressed: () => _copyFcmToken(context),
+                    ),
+                    const SizedBox(height: 8),
                     _FcmDemoButton(
                       label: 'Cadangan: uji list',
                       onPressed: () => _runLocalNotif(
@@ -648,6 +653,23 @@ class _MusicPlayboxPageState extends State<MusicPlayboxPage> {
   }
 }
 
+Future<void> _copyFcmToken(BuildContext context) async {
+  final token = PushService.instance.registrationToken;
+  if (token == null || token.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Token FCM belum ada. Buka ulang app.')),
+    );
+    return;
+  }
+  await Clipboard.setData(ClipboardData(text: token));
+  if (!context.mounted) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('Token disalin. Tempel di Firebase Console → Send test message.'),
+    ),
+  );
+}
+
 Future<void> _runLocalNotif(
   BuildContext context,
   NotifKind kind,
@@ -658,11 +680,14 @@ Future<void> _runLocalNotif(
     if (!context.mounted) return;
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(success)));
-  } catch (_) {
+  } catch (error, stack) {
+    debugPrint('Local notification demo failed: $error\n$stack');
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Gagal menampilkan banner lokal. Cek izin notifikasi.'),
+      SnackBar(
+        content: Text(
+          'Gagal menampilkan banner lokal. $error',
+        ),
       ),
     );
   }
