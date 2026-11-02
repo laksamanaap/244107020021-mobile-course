@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'app_theme.dart';
-import 'lms_content.dart';
+import '../content/lms_content.dart';
+import '../theme/app_theme.dart';
 
 /// Dashboard LMS — layout tetap grid + list, konten kelas kampus.
 class SpotifyHomePage extends StatefulWidget {

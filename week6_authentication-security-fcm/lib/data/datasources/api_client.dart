@@ -3,9 +3,9 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
+import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repositories/token_store.dart';
 import 'api_config.dart';
-import 'auth_repository.dart';
-import 'token_store.dart';
 
 const _retriedKey = 'auth_retried';
 

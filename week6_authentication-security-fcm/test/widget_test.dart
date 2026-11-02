@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:week6_authentication_security_fcm/data/token_store.dart';
+import 'package:week6_authentication_security_fcm/data/repositories/secure_token_store.dart';
 import 'package:week6_authentication_security_fcm/main.dart';
 
 void main() {

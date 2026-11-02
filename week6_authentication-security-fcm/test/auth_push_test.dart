@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:week6_authentication_security_fcm/data/api_errors.dart';
-import 'package:week6_authentication_security_fcm/messaging/notif_kind.dart';
-import 'package:week6_authentication_security_fcm/routes.dart';
+import 'package:week6_authentication_security_fcm/data/datasources/api_errors.dart';
+import 'package:week6_authentication_security_fcm/domain/entities/notif_kind.dart';
+import 'package:week6_authentication_security_fcm/domain/routing/app_routes.dart';
 
 class FakeTokenStore {
   String? access;

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../app_theme.dart';
-import '../messaging/inbox_service.dart';
-import '../routes.dart';
+import '../../domain/entities/campus_inbox_item.dart';
+import '../../domain/routing/app_routes.dart';
+import '../../domain/services/inbox_service.dart';
+import '../theme/app_theme.dart';
 
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});

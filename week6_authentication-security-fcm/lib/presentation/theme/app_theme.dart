@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'messaging/inbox_service.dart';
+import '../../domain/entities/campus_inbox_item.dart';
+import '../../domain/services/inbox_service.dart';
 
 /// Design system LMS kampus — terang, teal, dipakai di Beranda / Kelas / Kursus / Profil.
 abstract final class AppTheme {

@@ -3,10 +3,10 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:week6_authentication_security_fcm/data/api_client.dart';
-import 'package:week6_authentication_security_fcm/data/auth_repository.dart';
-import 'package:week6_authentication_security_fcm/data/token_store.dart';
-import 'package:week6_authentication_security_fcm/providers/auth_provider.dart';
+import 'package:week6_authentication_security_fcm/data/datasources/api_client.dart';
+import 'package:week6_authentication_security_fcm/data/repositories/auth_repository_impl.dart';
+import 'package:week6_authentication_security_fcm/data/repositories/secure_token_store.dart';
+import 'package:week6_authentication_security_fcm/presentation/providers/auth_provider.dart';
 
 void main() {
   test('TokenStore menyimpan, membaca, dan menghapus token', () async {
@@ -20,14 +20,14 @@ void main() {
   });
 
   test('login mock valid mengembalikan token simulasi', () async {
-    final repo = AuthRepository();
+    final repo = AuthRepositoryImpl();
     final session = await repo.login(email: 'a@b.c', password: '123456');
     expect(session.access, contains('mock-access-for-a@b.c'));
     expect(session.refresh, contains('mock-refresh-for-a@b.c'));
   });
 
   test('login mock menolak kredensial tidak valid', () async {
-    final repo = AuthRepository();
+    final repo = AuthRepositoryImpl();
     expect(
       () => repo.login(email: 'salah', password: '123'),
       throwsA(isA<Exception>()),
@@ -35,7 +35,7 @@ void main() {
   });
 
   test('refresh token kosong gagal', () async {
-    expect(() => AuthRepository().refresh(''), throwsA(isA<Exception>()));
+    expect(() => AuthRepositoryImpl().refresh(''), throwsA(isA<Exception>()));
   });
 
   test('request memakai Bearer dan HTTP 401 memicu refresh sekali', () async {
@@ -48,7 +48,7 @@ void main() {
     var expired = 0;
     final dio = buildApiClient(
       store,
-      auth: AuthRepository(),
+      auth: AuthRepositoryImpl(),
       onSessionExpired: () async => expired++,
       adapter: spy,
     );
@@ -71,7 +71,7 @@ void main() {
       refresh: 'mock-refresh-for-a@b.c',
     );
     final spy = _HeaderSpyAdapter(CampusMockAdapter());
-    final dio = buildApiClient(store, auth: AuthRepository(), adapter: spy);
+    final dio = buildApiClient(store, auth: AuthRepositoryImpl(), adapter: spy);
     await dio.get('/protected');
     final renewed = store.access;
     final res = await dio.get('/protected');
@@ -87,7 +87,7 @@ void main() {
     final store = MemoryTokenStore();
     await store.save(access: 'acc', refresh: 'ref');
     final adapter = _Always401Adapter();
-    final dio = buildApiClient(store, auth: AuthRepository(), adapter: adapter);
+    final dio = buildApiClient(store, auth: AuthRepositoryImpl(), adapter: adapter);
 
     await expectLater(dio.get('/protected'), throwsA(isA<DioException>()));
     expect(adapter.fetches, 2);
@@ -100,7 +100,7 @@ void main() {
     final adapter = _Always401Adapter();
     final dio = buildApiClient(
       store,
-      auth: AuthRepository(),
+      auth: AuthRepositoryImpl(),
       onSessionExpired: () async => expired++,
       adapter: adapter,
     );

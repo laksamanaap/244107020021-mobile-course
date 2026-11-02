@@ -1,40 +1,20 @@
 import 'package:dio/dio.dart';
 
-import 'api_errors.dart';
-
-class AuthSession {
-  const AuthSession({required this.access, required this.refresh, this.user});
-
-  final String access;
-  final String refresh;
-  final AuthUser? user;
-}
-
-class AuthUser {
-  const AuthUser({required this.id, required this.name, required this.email});
-
-  final int id;
-  final String name;
-  final String email;
-
-  factory AuthUser.fromJson(Map<String, dynamic> json) {
-    return AuthUser(
-      id: (json['id'] as num?)?.toInt() ?? 0,
-      name: json['name']?.toString() ?? '',
-      email: json['email']?.toString() ?? '',
-    );
-  }
-}
+import '../../domain/entities/auth_session.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../datasources/api_errors.dart';
 
 /// Login ke Laravel Sanctum kalau [dio] diisi.
 /// Tanpa [dio] tetap mock — dipakai unit/widget test.
-class AuthRepository {
-  AuthRepository({Dio? this._dio});
+class AuthRepositoryImpl implements AuthRepository {
+  AuthRepositoryImpl({Dio? this._dio});
 
   final Dio? _dio;
 
+  @override
   bool get usesLiveApi => _dio != null;
 
+  @override
   Future<AuthSession> login({
     required String email,
     required String password,
@@ -75,6 +55,7 @@ class AuthRepository {
     }
   }
 
+  @override
   Future<AuthUser> me() async {
     final dio = _dio;
     if (dio == null) {
@@ -97,6 +78,7 @@ class AuthRepository {
     }
   }
 
+  @override
   Future<void> logout() async {
     final dio = _dio;
     if (dio == null) return;
@@ -107,6 +89,7 @@ class AuthRepository {
     }
   }
 
+  @override
   Future<String> refresh(String refreshToken) async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
     if (refreshToken.isEmpty) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'app_theme.dart';
-import 'lms_content.dart';
+import '../content/lms_content.dart';
+import '../theme/app_theme.dart';
 
 void showSyllabusSheet({
   required BuildContext context,

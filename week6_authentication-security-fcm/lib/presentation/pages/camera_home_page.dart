@@ -6,7 +6,7 @@ import 'package:gal/gal.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-import 'app_theme.dart';
+import '../theme/app_theme.dart';
 import 'location_map_page.dart';
 
 /// Halaman Home: preview kamera, selfie, ambil foto, dan simpan.

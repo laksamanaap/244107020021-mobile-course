@@ -7,9 +7,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-import '../routes.dart';
-import 'inbox_service.dart';
-import 'notif_kind.dart';
+import '../../domain/entities/notif_kind.dart';
+import '../../domain/routing/app_routes.dart';
+import '../../domain/services/inbox_service.dart';
 
 /// Handler background WAJIB top-level + pragma. Jangan akses BuildContext,
 /// GoRouter, atau Riverpod di sini (isolate terpisah).

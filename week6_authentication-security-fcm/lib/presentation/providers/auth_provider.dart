@@ -1,14 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/api_client.dart';
-import '../data/auth_repository.dart';
-import '../data/token_store.dart';
-import '../messaging/inbox_service.dart';
+import '../../data/datasources/api_client.dart';
+import '../../data/repositories/auth_repository_impl.dart';
+import '../../data/repositories/secure_token_store.dart';
+import '../../domain/entities/campus_inbox_item.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repositories/token_store.dart';
+import '../../domain/services/inbox_service.dart';
 
-final tokenStoreProvider = Provider<TokenStore>((ref) => TokenStore());
+final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
 
 final authRepositoryProvider = Provider<AuthRepository>(
-  (ref) => AuthRepository(),
+  (ref) => AuthRepositoryImpl(),
 );
 
 final authStateProvider = AsyncNotifierProvider<AuthNotifier, bool>(
