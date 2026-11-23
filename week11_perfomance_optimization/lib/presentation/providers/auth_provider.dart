@@ -1,0 +1,93 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../data/datasources/api_client.dart';
+import '../../data/repositories/auth_repository_impl.dart';
+import '../../data/repositories/notification_repository.dart';
+import '../../data/repositories/secure_token_store.dart';
+import '../../domain/entities/campus_inbox_item.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../../domain/repositories/token_store.dart';
+import '../../domain/services/inbox_service.dart';
+
+final tokenStoreProvider = Provider<TokenStore>((ref) => SecureTokenStore());
+
+final authRepositoryProvider = Provider<AuthRepository>(
+  (ref) => AuthRepositoryImpl(),
+);
+
+final authStateProvider = AsyncNotifierProvider<AuthNotifier, bool>(
+  AuthNotifier.new,
+);
+
+final apiClientProvider = Provider((ref) {
+  return buildApiClient(
+    ref.watch(tokenStoreProvider),
+    onSessionExpired: () async {
+      InboxService.instance.clear();
+      ref.invalidate(authStateProvider);
+    },
+  );
+});
+
+final campusApiProvider = Provider<CampusApi>((ref) {
+  return CampusApi(ref.watch(apiClientProvider));
+});
+
+final notificationRepositoryProvider = Provider<NotificationRepository>((ref) {
+  final api = ref.watch(campusApiProvider);
+  return NotificationRepository(api.listNotifications);
+});
+
+class AuthNotifier extends AsyncNotifier<bool> {
+  @override
+  Future<bool> build() async {
+    try {
+      final token = await ref.watch(tokenStoreProvider).readAccess();
+      if (token == null || token.isEmpty) return false;
+      await ref.read(authRepositoryProvider).me();
+      await _hydrateInbox();
+      return true;
+    } catch (_) {
+      await ref.read(tokenStoreProvider).clear();
+      InboxService.instance.clear();
+      return false;
+    }
+  }
+
+  Future<void> login(String email, String password) async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final session = await ref
+          .read(authRepositoryProvider)
+          .login(email: email, password: password);
+      await ref
+          .read(tokenStoreProvider)
+          .save(access: session.access, refresh: session.refresh);
+      await _hydrateInbox();
+      return true;
+    });
+  }
+
+  Future<void> logout() async {
+    try {
+      await ref.read(authRepositoryProvider).logout();
+    } catch (_) {}
+    await ref.read(tokenStoreProvider).clear();
+    InboxService.instance.clear();
+    ref.invalidateSelf();
+  }
+
+  Future<void> _hydrateInbox() async {
+    if (!ref.read(authRepositoryProvider).usesLiveApi) return;
+    try {
+      final rows = await ref
+          .read(notificationRepositoryProvider)
+          .load(onFresh: _publishInbox);
+      _publishInbox(rows);
+    } catch (_) {}
+  }
+
+  void _publishInbox(List<Map<String, dynamic>> rows) {
+    InboxService.instance.replace(rows.map(CampusInboxItem.fromApi).toList());
+  }
+}

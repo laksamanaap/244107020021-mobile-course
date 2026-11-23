@@ -1,0 +1,14 @@
+Pengukuran dari widget test.
+
+REBUILD grid=1 tetap, recent 1 -> 2
+Artinya: ketuk filter "Tugas" tidak membangun ulang grid gambar.
+List "Lanjutkan belajar" yang memang harus berubah, di-rebuild (1 -> 2).
+
+LIST eager_tiles=80 ±129,6ms builder_tiles=11 ±74,3ms
+Column + 80 ListTile memasang 80 tile.
+ListView.builder dengan 80 item hanya memasang 11 tile yang terlihat.
+Waktu pump di widget test: ±129,6 ms vs ±74,3 ms.
+
+flutter analyze: 0 error. 6 info lama (FCM deprecated, print di Mahasiswa, type pada constructor).
+flutter test: 25 lulus.
+flutter build web: berhasil.
