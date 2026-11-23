@@ -1,0 +1,15 @@
+Pengukuran dari flutter test (bukan DevTools di HP).
+
+REBUILD grid=1 tetap, recent 1 -> 2
+Artinya: ketuk filter "Tugas" tidak membangun ulang grid gambar.
+Daftar "Lanjutkan belajar" yang memang harus berubah, dibangun ulang (1 -> 2).
+
+LIST eager_tiles=80 129592us builder_tiles=11 74253us
+Column + 80 ListTile memasang 80 tile.
+ListView.builder dengan 80 item hanya memasang 11 tile yang terlihat.
+Waktu pump di tes: 129592 µs vs 74253 µs.
+
+flutter analyze: 0 error. 6 info lama (FCM deprecated, print di Mahasiswa, type pada constructor).
+flutter test: 25 lulus.
+flutter build web: berhasil.
+flutter build apk: Android SDK tidak ada di mesin ini.
